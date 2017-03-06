@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no"/>
+	<title>Graph 3D</title>
+
+	<link rel="stylesheet" href="">
+
+	<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+	<script src="./three.js/build/three.js"></script>
+	<script src="./three.js/examples/js/libs/dat.gui.min.js"></script>
+<!-- 	<script src="{% static 'js/ThreeJS/examples/js/exporters/OBJExporter.js' %}"></script>
+	<script src="{% static 'js/FileSaver/FileSaver.min.js' %}"></script> -->
+	<script src="./js-priority-queue/priority-queue.js"></script>
+	<script src="OrbitControls.js"></script>
+	<script src="mySceneSetup.js"></script>
+	<script src="graph.js"></script>
+</head>
+
+js-priority-queue
+
+<body>
+
+
+	<div id="viewport"></div>
+	<div id="datGUI"></div>
+
+
+	<script type="text/javascript">
+		initScene();
+		setupKeyListeners();
+	</script>
+
+
+</body>
+</html>
