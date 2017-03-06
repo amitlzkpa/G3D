@@ -73,18 +73,39 @@ function readNodeData(textDataForNodeData) {
 
 
 class Node {
-    constructor(textDataForNode) {
+
+
+    attachData(textDataForNode) {
         this.rawData = textDataForNode;
         this.id = readNodeId(textDataForNode["id"]);
         this.name = textDataForNode["name"];
         this.data = readNodeData(textDataForNode["data"]);
         this.neighbours = textDataForNode["neighbours"];
         this.mesh = getSphereMesh(0.5, 0.5, 0.5, 0xff0000);
+        return this;
+    }
+
+
+
+    constructor() {
+        this.rawData = null;
+        this.id = null;
+        this.name = null;
+        this.data = null;
+        this.neighbours = null;
+        this.mesh = null;
     }
 
 
     clone() {
-        return new Node(this.rawData);
+        var n = new Node();
+        n.rawData = this.rawData;
+        n.id = this.getId();
+        n.name = this.getName();
+        n.data = this.getData();
+        n.neighbours = this.getNeighbours();
+        n.mesh = this.getMesh();
+        return n;
     }
 
 
@@ -258,7 +279,7 @@ class Graph {
         var objectArray = [];
         for (var i=0; i<textDataForGraph.length; i++) {
             var textDataForNode = textDataForGraph[i];
-            var objectForNode = new Node(textDataForNode);
+            var objectForNode = new Node().attachData(textDataForNode);
             objectArray.push(objectForNode);
         }
 
@@ -332,21 +353,57 @@ function graphRun(){
 
 
 
-// @CONTINUE HERE
-function addGraphToScene(graph) {
+// src: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+function getRandomArbitrary(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+
+function getRandomPointNearPt(srcPt, maxDistance) {
+    var rX = getRandomArbitrary(srcPt.x, srcPt.x + maxDistance);
+    var rY = getRandomArbitrary(srcPt.y, srcPt.y + maxDistance);
+    var rZ = getRandomArbitrary(srcPt.z, srcPt.z + maxDistance);
+    return new THREE.Vector3(rX, rY, rZ);
+}
+
+
+
+
+function addNodes(graph) {
     var gIterator = graph.getIterator();
-    var x=0;
-    var z=0;
-    var inc = 10;
     while (!gIterator.end()) {
         var node = gIterator.nextNode();
         var m = node.getMesh();
-        m.position.set(x, 0, z);
-        x += inc;
+        var randomPos = getRandomPointNearPt(new THREE.Vector3(), 10);
+        m.position.set(randomPos.x, randomPos.y, randomPos.z);
         scene.add(m);
-        // z += inc;
-        // console.log();
     }
+}
+
+
+
+
+function addEdges(graph) {
+    var gIterator = graph.getIterator();
+    console.log(gIterator);
+    while (!gIterator.end()) {
+        var node = gIterator.nextNode();
+        var srcNodePos = node.getPosition();
+        var neighbours = node.getNeighbours();
+        for (var i=0; i<neighbours.length; i++) {
+            var n = neighbours[i];
+            var edge = getLine(srcNodePos, n.getPosition(), 0xff00ff);
+            scene.add(edge);
+        }
+    }
+}
+
+
+
+
+function addGraphToScene(graph) {
+    addNodes(graph);
+    addEdges(graph);
 }
 
 
