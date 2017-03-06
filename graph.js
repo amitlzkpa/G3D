@@ -74,12 +74,17 @@ function readNodeData(textDataForNodeData) {
 
 class Node {
     constructor(textDataForNode) {
-        // console.log(textDataForNode["id"]);
+        this.rawData = textDataForNode;
         this.id = readNodeId(textDataForNode["id"]);
         this.name = textDataForNode["name"];
         this.data = readNodeData(textDataForNode["data"]);
         this.neighbours = textDataForNode["neighbours"];
         this.mesh = getSphereMesh(0.5, 0.5, 0.5, 0xff0000);
+    }
+
+
+    clone() {
+        return new Node(this.rawData);
     }
 
 
@@ -270,6 +275,42 @@ class Graph {
     getGraph() {
         return this.nodeArray;
     }
+
+
+    getIterator() {
+        return new GraphIterator(this);
+    }
+
+
+    deepcopy() {
+        var cloneArray = [];
+        for (var i=0; i<this.nodeArray.length; i++) {
+            cloneArray.push(this.nodeArray[i].clone());
+        }
+        return cloneArray;
+    }
+}
+
+
+
+
+
+
+class GraphIterator {
+    constructor(graph) {
+        this.iterArray = graph.deepcopy();
+        this.i=0;
+    }
+
+    nextNode() {
+        var retItem = this.iterArray[this.i];
+        this.i++;
+        return retItem;
+    }
+
+    end() {
+        return (this.i == this.iterArray.length)
+    }
 }
 
 
@@ -282,9 +323,29 @@ function graphRun(){
     var textDataForGraph = getTextData();
     if (isValidGraphData(textDataForGraph)) {
         var graph = new Graph(textDataForGraph);
-        console.log(graph.getGraph());
+        // console.log(graph.getGraph());
+
+        addGraphToScene(graph);
+
+    }
+}
 
 
+
+// @CONTINUE HERE
+function addGraphToScene(graph) {
+    var gIterator = graph.getIterator();
+    var x=0;
+    var z=0;
+    var inc = 10;
+    while (!gIterator.end()) {
+        var node = gIterator.nextNode();
+        var m = node.getMesh();
+        m.position.set(x, 0, z);
+        x += inc;
+        scene.add(m);
+        // z += inc;
+        // console.log();
     }
 }
 
