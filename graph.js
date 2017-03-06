@@ -75,6 +75,16 @@ function readNodeData(textDataForNodeData) {
 class Node {
 
 
+    constructor() {
+        this.rawData = null;
+        this.id = null;
+        this.name = null;
+        this.data = null;
+        this.neighbours = null;
+        this.mesh = null;
+    }
+
+
     attachData(textDataForNode) {
         this.rawData = textDataForNode;
         this.id = readNodeId(textDataForNode["id"]);
@@ -83,17 +93,6 @@ class Node {
         this.neighbours = textDataForNode["neighbours"];
         this.mesh = getSphereMesh(0.5, 0.5, 0.5, 0xff0000);
         return this;
-    }
-
-
-
-    constructor() {
-        this.rawData = null;
-        this.id = null;
-        this.name = null;
-        this.data = null;
-        this.neighbours = null;
-        this.mesh = null;
     }
 
 
@@ -147,6 +146,8 @@ class Node {
     equals(otherNode) {
         return this.id == otherNode.getId();
     }
+
+    
 }
 
 
