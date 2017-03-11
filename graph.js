@@ -2,6 +2,21 @@
 
 
 
+Array.prototype.remove = function(item) {
+    var idx = -1;
+    for (var i=0; i<this.length; i++) {
+        if (this[i].equals(item.getId())) idx = i;
+    }
+    if (idx < 0) {
+        throw "Item not in graph";
+        return;
+    }
+    this.splice(idx,1);
+}
+
+
+
+
 
 //-----------------------------------------------------------------------------
 
@@ -71,8 +86,10 @@ function readNodeData(textDataForNodeData) {
 
 
 
-
 class Node {
+
+
+    this.type = 'Node';
 
 
     constructor() {
@@ -91,7 +108,8 @@ class Node {
         this.name = textDataForNode["name"];
         this.data = readNodeData(textDataForNode["data"]);
         this.neighbours = textDataForNode["neighbours"];
-        this.mesh = getSphereMesh(0.5, 0.5, 0.5, 0xff0000);
+        this.mesh = getSphereMesh(0.5, 30, 30, DEFAULT_OBJECT_COLOR);
+        // this.mesh.attachedObjects(this);
         return this;
     }
 
@@ -145,6 +163,11 @@ class Node {
 
     equals(otherNode) {
         return this.id == otherNode.getId();
+    }
+
+
+    onHoverOut() {
+        console.log(getName());
     }
 
     
@@ -275,12 +298,23 @@ function getObjectsById(neighboursIds, srcArray) {
 
 
 
+function placeElementFirst(inpGraph, inpElem) {
+    var graphArr = inpGraph.iterArray;
+    graphArr.remove(inpElem);
+    graphArr.unshift(inpElem);
+    return inpGraph;
+}
+
+
+
 class Graph {
     constructor(textDataForGraph) {
+        this.nodeLibrary = {};
         var objectArray = [];
         for (var i=0; i<textDataForGraph.length; i++) {
             var textDataForNode = textDataForGraph[i];
             var objectForNode = new Node().attachData(textDataForNode);
+            this.nodeLibrary[objectForNode.getId()] = objectForNode;
             objectArray.push(objectForNode);
         }
 
@@ -294,6 +328,11 @@ class Graph {
     }
 
 
+    getNode(nodeId) {
+        return this.nodeLibrary[nodeId];
+    }
+
+
     getGraph() {
         return this.nodeArray;
     }
@@ -301,6 +340,12 @@ class Graph {
 
     getIterator() {
         return new GraphIterator(this);
+    }
+
+
+    getIteratorFromNode(startNode) {
+        var graphArray = new GraphIterator(this);
+        return placeElementFirst(graphArray, startNode);
     }
 
 
@@ -340,12 +385,13 @@ class GraphIterator {
 //---------------------------------------------------------
 
 
+var graph;
+
 
 function graphRun(){
     var textDataForGraph = getTextData();
     if (isValidGraphData(textDataForGraph)) {
-        var graph = new Graph(textDataForGraph);
-        // console.log(graph.getGraph());
+        graph = new Graph(textDataForGraph);
 
         addGraphToScene(graph);
 
@@ -386,14 +432,13 @@ function addNodes(graph) {
 
 function addEdges(graph) {
     var gIterator = graph.getIterator();
-    console.log(gIterator);
     while (!gIterator.end()) {
         var node = gIterator.nextNode();
         var srcNodePos = node.getPosition();
         var neighbours = node.getNeighbours();
         for (var i=0; i<neighbours.length; i++) {
             var n = neighbours[i];
-            var edge = getLine(srcNodePos, n.getPosition(), 0xff00ff);
+            var edge = getLine(srcNodePos, n.getPosition(),  DEFAULT_LINE_COLOR);
             scene.add(edge);
         }
     }
@@ -405,6 +450,25 @@ function addEdges(graph) {
 function addGraphToScene(graph) {
     addNodes(graph);
     addEdges(graph);
+}
+
+
+
+function findPath() {
+    var start = graph.getNode(01);
+    var end = graph.getNode(07);
+    var queue = [];
+    var iter = graph.getIteratorFromNode(start);
+    var nd = iter.nextNode();
+    queue.push(nd);
+    while(queue.length > 0) {
+        nd = queue.pop();
+        var nbrs = nd.getNeighbours();
+        for (var i=0; i<nbrs.length; i++) {
+            queue.push(nbrs[i]);
+            if (end.equals(nbrs[i])) return queue;
+        }
+    }
 }
 
 
@@ -423,17 +487,27 @@ function setupKeyListeners() {
         switch ( event.keyCode ) {
             // Q
             case 81: {
+                stopRunning();
+                break;
+            }
+            // G
+            case 71: {
                 graphRun();
                 break;
             }
-            // W
-            case 87: {
+            // F
+            case 70: {
+                console.log(findPath());
                 break;
             }
         }
     });
 }
 
+
+// Mesh.prototype.onHoverOut()  = function() {
+//     console.log("foo");
+// }
 
 
 //-----------------------------------------------------------------------------
