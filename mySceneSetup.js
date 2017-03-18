@@ -42,6 +42,7 @@ function initScene() {
                 wireframe: true
             } )
         );
+        plane.rotation.set(Math.PI/2, 0, Math.PI/2);
 
         scene.add(plane);
     }
@@ -101,28 +102,32 @@ function initScene() {
         window.addEventListener( 'mousemove', onMouseMove, false );
         window.addEventListener( 'resize', onWindowResize, false );
 
-        // addGridPlane();
+        addGridPlane();
     };
 
 
 
+    var prevHighlight = null;
+    var currHighlight = null;
     function highLightHoverObject(intersects) {
-        scene.traverse (function (sceneObject) {
-            if (!(sceneObject instanceof THREE.Mesh)) return;
-            if (intersects[0].object == sceneObject) {
-                sceneObject.material.color.setHex(HIGHLIGHT_OBJECT_COLOR);
-            }
-            else {
-                sceneObject.material.color.setHex(DEFAULT_OBJECT_COLOR);
-            }
-        });
+        if (intersects.length < 1 || !intersects[0].object.isNode) {
+            if (prevHighlight != null) prevHighlight.onHoverOut();
+            return;
+        }
+        currHighlight = intersects[0].object;
+        if (currHighlight != prevHighlight) {
+            if (prevHighlight != null) prevHighlight.onHoverOut();
+            if (currHighlight != null) currHighlight.onHoverIn();
+        }
+        // if(currHighlight.__proto__.hasOwnProperty('onHoverIn')) {
+        //     currHighlight.onHoverIn();
+        // }
+        prevHighlight = currHighlight;
     }
 
 
 
 
-    var prevHighlights = null;
-    var currHighlights = null;
     fail = false;
 
     function renderScene(){
@@ -132,10 +137,7 @@ function initScene() {
             // update the picking ray with the camera and mouse position
             raycaster.setFromCamera( mouse, camera );
             var intersects = raycaster.intersectObjects( scene.children );
-            if (intersects.length > 0) {
-                console.log(intersects[0].object);
-                // highLightHoverObject(intersects);
-            }
+            highLightHoverObject(intersects);
 
             renderer.render( scene, camera );
             requestAnimationFrame( render );

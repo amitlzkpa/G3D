@@ -5,7 +5,7 @@
 Array.prototype.remove = function(item) {
     var idx = -1;
     for (var i=0; i<this.length; i++) {
-        if (this[i].equals(item.getId())) idx = i;
+        if (this[i].equals(item.getNodeID())) idx = i;
     }
     if (idx < 0) {
         throw "Item not in graph";
@@ -74,103 +74,72 @@ function getBoxMesh(width, height, depth, color) {
 
 
 
-function readNodeId(textDataForNodeID) {
-    return textDataForNodeID;
-}
 
 
 
-function readNodeData(textDataForNodeData) {
-    return textDataForNodeData;
-}
+var highLightColor = new THREE.Color("rgb(255, 0, 0)");
+var normalColor = new THREE.Color("rgb(255, 255, 0)");
 
 
-
-class Node {
-
-
+function Node(nodeID, nodeName, nodeData, nodeNeighbours) {
+    this.isNode = true;
     this.type = 'Node';
+    this.nodeID = nodeID;
+    this.nodeName = nodeName;
+    this.nodeData = nodeData;
+    this.nodeNeighbours = nodeNeighbours;
+    this.geometry = new THREE.SphereGeometry(1, 32, 32);
+    this.material = new THREE.MeshBasicMaterial({color: normalColor});
+    THREE.Mesh.call( this, this.geometry, this.material );
+}
 
 
-    constructor() {
-        this.rawData = null;
-        this.id = null;
-        this.name = null;
-        this.data = null;
-        this.neighbours = null;
-        this.mesh = null;
-    }
+
+// Node.prototype.isNode = true;
+Node.prototype = Object.create( THREE.Mesh.prototype );
+Node.prototype.constructor = Node;
+
+Node.prototype.getNodeID = function() {
+    return this.nodeID;
+}
+
+Node.prototype.getNodeName = function() {
+    return this.nodeName;
+}
+
+Node.prototype.getNodeData = function() {
+    return this.nodeData;
+}
+
+Node.prototype.getNodeNeighbours = function() {
+    return this.nodeNeighbours;
+}
+
+Node.prototype.setNodeNeighbours = function(neightbourArray) {
+    this.nodeNeighbours = neightbourArray;
+}
+
+Node.prototype.equals = function(otherNode) {
+    if (!(otherNode instanceof Node)) return false;
+    return this.nodeID == otherNode.getNodeID();
+}
+
+Node.prototype.toString = function() {
+    return "[" + this.nodeID + " - " + this.nodeName + "]-->" + this.nodeNeighbours.toString();
+}
 
 
-    attachData(textDataForNode) {
-        this.rawData = textDataForNode;
-        this.id = readNodeId(textDataForNode["id"]);
-        this.name = textDataForNode["name"];
-        this.data = readNodeData(textDataForNode["data"]);
-        this.neighbours = textDataForNode["neighbours"];
-        this.mesh = getSphereMesh(0.5, 30, 30, DEFAULT_OBJECT_COLOR);
-        // this.mesh.attachedObjects(this);
-        return this;
-    }
+Node.prototype.onHoverIn = function(){
+    this.material.color = highLightColor;
+}
 
 
-    clone() {
-        var n = new Node();
-        n.rawData = this.rawData;
-        n.id = this.getId();
-        n.name = this.getName();
-        n.data = this.getData();
-        n.neighbours = this.getNeighbours();
-        n.mesh = this.getMesh();
-        return n;
-    }
+Node.prototype.onHoverStay = function(){
+}
 
 
-    getId() {
-        return this.id;
-    }
-
-
-    getName() {
-        return this.name;
-    }
-
-
-    getData() {
-        return this.data;
-    }
-
-
-    getNeighbours() {
-        return this.neighbours;
-    }
-
-
-    setNeighbours(neightbourArray) {
-        this.neighbours = neightbourArray;
-    }
-
-
-    getMesh() {
-        return this.mesh;
-    }
-
-
-    getPosition() {
-        return this.mesh.position;
-    }
-
-
-    equals(otherNode) {
-        return this.id == otherNode.getId();
-    }
-
-
-    onHoverOut() {
-        console.log(getName());
-    }
-
-    
+Node.prototype.onHoverOut = function(){
+    this.material.color = normalColor;
 }
 
 
@@ -184,68 +153,68 @@ class Node {
 
 
 
-// "name" = "name";
-// "id" = "id";
-// "data" = "data";
-// "neighbours" = "neighbours";
+// "nodeName" = "nodeName";
+// "nodeID" = "nodeID";
+// "nodeData" = "nodeData";
+// "nodeNeighbours" = "nodeNeighbours";
 
 
 
 
 var testGraph = [
                     {
-                        "name": "A",
-                        "id": 01,
-                        "data": "fooA",
-                        "neighbours": [02, 03]
+                        "nodeName": "A",
+                        "nodeID": 01,
+                        "nodeData": "fooA",
+                        "nodeNeighbours": [02, 03]
                     },
                     {
-                        "name": "B",
-                        "id": 02,
-                        "data": "fooB",
-                        "neighbours": [01, 03]
+                        "nodeName": "B",
+                        "nodeID": 02,
+                        "nodeData": "fooB",
+                        "nodeNeighbours": [01, 03]
                     },
                     {
-                        "name": "C",
-                        "id": 03,
-                        "data": "fooC",
-                        "neighbours": [01, 02, 04, 05]
+                        "nodeName": "C",
+                        "nodeID": 03,
+                        "nodeData": "fooC",
+                        "nodeNeighbours": [01, 02, 04, 05]
                     },
                     {
-                        "name": "D",
-                        "id": 04,
-                        "data": "fooD",
-                        "neighbours": [03, 05, 06]
+                        "nodeName": "D",
+                        "nodeID": 04,
+                        "nodeData": "fooD",
+                        "nodeNeighbours": [03, 05, 06]
                     },
                     {
-                        "name": "E",
-                        "id": 05,
-                        "data": "fooE",
-                        "neighbours": [03, 04, 07]
+                        "nodeName": "E",
+                        "nodeID": 05,
+                        "nodeData": "fooE",
+                        "nodeNeighbours": [03, 04, 07]
                     },
                     {
-                        "name": "F",
-                        "id": 06,
-                        "data": "fooF",
-                        "neighbours": [04, 08]
+                        "nodeName": "F",
+                        "nodeID": 06,
+                        "nodeData": "fooF",
+                        "nodeNeighbours": [04, 08]
                     },
                     {
-                        "name": "G",
-                        "id": 07,
-                        "data": "fooG",
-                        "neighbours": [05, 08]
+                        "nodeName": "G",
+                        "nodeID": 07,
+                        "nodeData": "fooG",
+                        "nodeNeighbours": [05, 08]
                     },
                     {
-                        "name": "H",
-                        "id": 08,
-                        "data": "fooH",
-                        "neighbours": [06, 07, 09]
+                        "nodeName": "H",
+                        "nodeID": 08,
+                        "nodeData": "fooH",
+                        "nodeNeighbours": [06, 07, 09]
                     },
                     {
-                        "name": "I",
-                        "id": 09,
-                        "data": "fooI",
-                        "neighbours": [08]
+                        "nodeName": "I",
+                        "nodeID": 09,
+                        "nodeData": "fooI",
+                        "nodeNeighbours": [08]
                     }
                 ];
 
@@ -260,7 +229,7 @@ function getTextData() {
 
 
 
-function isValidGraphData(data) {
+function isValidGraphData(nodeData) {
     // check for duplicate ids
     // 
     return true;
@@ -272,69 +241,41 @@ function isValidGraphData(data) {
 
 
 
-function getObjectById(nodeId, srcArray) {
-    var found = null;
-    var seen = 0;
-    while (seen < srcArray.length && found == null) {
-        if (srcArray[seen].getId() == nodeId) found = srcArray[seen];
-        seen++;
-    }
-    return found;
-}
-
-
-
-function getObjectsById(neighboursIds, srcArray) {
-    returnArray = [];
-    for (var i=0; i<neighboursIds.length; i++) {
-        returnArray.push(getObjectById(neighboursIds[i], srcArray));
-    }
-    return returnArray;
-}
-
-
-
-//---------------------------------------------------------
-
-
-
-function placeElementFirst(inpGraph, inpElem) {
-    var graphArr = inpGraph.iterArray;
-    graphArr.remove(inpElem);
-    graphArr.unshift(inpElem);
-    return inpGraph;
-}
-
-
-
 class Graph {
     constructor(textDataForGraph) {
-        this.nodeLibrary = {};
-        var objectArray = [];
+        this.graphLibrary = {};
+        this.graphArray = [];
         for (var i=0; i<textDataForGraph.length; i++) {
             var textDataForNode = textDataForGraph[i];
-            var objectForNode = new Node().attachData(textDataForNode);
-            this.nodeLibrary[objectForNode.getId()] = objectForNode;
-            objectArray.push(objectForNode);
+            var objectForNode = new Node(textDataForNode['nodeID'],
+                                         textDataForNode['nodeName'],
+                                         textDataForNode['nodeData'],
+                                         textDataForNode['nodeNeighbours']);
+            this.graphLibrary[objectForNode.getNodeID()] = objectForNode;
+            this.graphArray.push(objectForNode);
         }
 
-        for (var i=0; i<objectArray.length; i++) {
-            var neighboursIds = objectArray[i].getNeighbours();
-            var neighbourObjects = getObjectsById(neighboursIds, objectArray);
-            objectArray[i].setNeighbours(neighbourObjects);
+        for (var i=0; i<this.graphArray.length; i++) {
+            var neighboursIds = this.graphArray[i].getNodeNeighbours();
+            var neighbourObjects = [];
+            for (var j=0; j<neighboursIds.length; j++) {
+                neighbourObjects.push(this.graphLibrary[neighboursIds[j]]);
+            }
+            this.graphArray[i].setNodeNeighbours(neighbourObjects);
         }
 
-        this.nodeArray = objectArray.sort(function(a, b) { return b.getNeighbours().length - a.getNeighbours().length; });
+        this.graphArray = this.graphArray.sort(function(a, b) { return b.getNodeNeighbours().length - a.getNodeNeighbours().length; });
+        // console.log(this.graphArray);
     }
 
 
     getNode(nodeId) {
-        return this.nodeLibrary[nodeId];
+        return this.graphLibrary[nodeId];
     }
 
 
-    getGraph() {
-        return this.nodeArray;
+    getGraphArray() {
+        return this.graphArray;
     }
 
 
@@ -351,8 +292,8 @@ class Graph {
 
     deepcopy() {
         var cloneArray = [];
-        for (var i=0; i<this.nodeArray.length; i++) {
-            cloneArray.push(this.nodeArray[i].clone());
+        for (var i=0; i<this.graphArray.length; i++) {
+            cloneArray.push(this.graphArray[i].clone());
         }
         return cloneArray;
     }
@@ -365,7 +306,7 @@ class Graph {
 
 class GraphIterator {
     constructor(graph) {
-        this.iterArray = graph.deepcopy();
+        this.iterArray = graph.getGraphArray();
         this.i=0;
     }
 
@@ -392,7 +333,6 @@ function graphRun(){
     var textDataForGraph = getTextData();
     if (isValidGraphData(textDataForGraph)) {
         graph = new Graph(textDataForGraph);
-
         addGraphToScene(graph);
 
     }
@@ -420,10 +360,9 @@ function addNodes(graph) {
     var gIterator = graph.getIterator();
     while (!gIterator.end()) {
         var node = gIterator.nextNode();
-        var m = node.getMesh();
-        var randomPos = getRandomPointNearPt(new THREE.Vector3(), 10);
-        m.position.set(randomPos.x, randomPos.y, randomPos.z);
-        scene.add(m);
+        var randomPos = getRandomPointNearPt(new THREE.Vector3(), 20);
+        node.position.set(randomPos.x, randomPos.y, randomPos.z);
+        scene.add(node);
     }
 }
 
@@ -434,11 +373,11 @@ function addEdges(graph) {
     var gIterator = graph.getIterator();
     while (!gIterator.end()) {
         var node = gIterator.nextNode();
-        var srcNodePos = node.getPosition();
-        var neighbours = node.getNeighbours();
-        for (var i=0; i<neighbours.length; i++) {
-            var n = neighbours[i];
-            var edge = getLine(srcNodePos, n.getPosition(),  DEFAULT_LINE_COLOR);
+        var srcNodePos = node.position;
+        var nodeNeighbours = node.getNodeNeighbours();
+        for (var i=0; i<nodeNeighbours.length; i++) {
+            var n = nodeNeighbours[i];
+            var edge = getLine(srcNodePos, n.position,  DEFAULT_LINE_COLOR);
             scene.add(edge);
         }
     }
@@ -450,26 +389,67 @@ function addEdges(graph) {
 function addGraphToScene(graph) {
     addNodes(graph);
     addEdges(graph);
+    // var spritey = makeTextSprite( "Amit", 
+    //     { fontsize: 24, borderColor: {r:0, g:0, b:0, a:0}, backgroundColor: {r:255, g:255, b:255, a:0.6} } );
+    // spritey.position.set(0,0,10);
+    // scene.add( spritey );
 }
 
 
 
-function findPath() {
-    var start = graph.getNode(01);
-    var end = graph.getNode(07);
-    var queue = [];
-    var iter = graph.getIteratorFromNode(start);
-    var nd = iter.nextNode();
-    queue.push(nd);
-    while(queue.length > 0) {
-        nd = queue.pop();
-        var nbrs = nd.getNeighbours();
-        for (var i=0; i<nbrs.length; i++) {
-            queue.push(nbrs[i]);
-            if (end.equals(nbrs[i])) return queue;
-        }
-    }
-}
+
+
+// ref: http://stackoverflow.com/questions/23514274/three-js-2d-text-sprite-labels
+// function makeTextSprite( message, parameters )
+// {
+//     var fontface = parameters.hasOwnProperty("fontface") ? parameters["fontface"] : "Arial";
+//     var fontsize = parameters.hasOwnProperty("fontsize") ? parameters["fontsize"] : 36;
+//     var borderThickness = parameters.hasOwnProperty("borderThickness") ? parameters["borderThickness"] : 4;
+//     var borderColor = parameters.hasOwnProperty("borderColor") ?parameters["borderColor"] : { r:0, g:0, b:0, a:1.0 };
+//     var backgroundColor = parameters.hasOwnProperty("backgroundColor") ?parameters["backgroundColor"] : { r:255, g:255, b:255, a:1.0 };
+//     var textColor = parameters.hasOwnProperty("textColor") ?parameters["textColor"] : { r:0, g:0, b:0, a:1.0 };
+
+//     var canvas = document.createElement('canvas');
+//     var context = canvas.getContext('2d');
+//     context.font = "Bold " + fontsize + "px " + fontface;
+//     var metrics = context.measureText( message );
+//     var textWidth = metrics.width;
+
+//     context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + "," + backgroundColor.b + "," + backgroundColor.a + ")";
+//     context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + "," + borderColor.b + "," + borderColor.a + ")";
+
+//     context.lineWidth = borderThickness;
+
+//     context.fillStyle = "rgba("+textColor.r+", "+textColor.g+", "+textColor.b+", 1.0)";
+//     context.fillText( message, borderThickness, fontsize + borderThickness);
+
+//     var texture = new THREE.Texture(canvas) 
+//     texture.needsUpdate = true;
+
+//     var spriteMaterial = new THREE.SpriteMaterial( { map: texture, useScreenCoordinates: false } );
+//     var sprite = new THREE.Sprite( spriteMaterial );
+//     sprite.scale.set(0.5 * fontsize, 0.25 * fontsize, 0.75 * fontsize);
+//     return sprite;   
+// }
+
+
+
+// function findPath() {
+//     var start = graph.getNode(01);
+//     var end = graph.getNode(07);
+//     var queue = [];
+//     var iter = graph.getIteratorFromNode(start);
+//     var nd = iter.nextNode();
+//     queue.push(nd);
+//     while(queue.length > 0) {
+//         nd = queue.pop();
+//         var nbrs = nd.getNodeNeighbours();
+//         for (var i=0; i<nbrs.length; i++) {
+//             queue.push(nbrs[i]);
+//             if (end.equals(nbrs[i])) return queue;
+//         }
+//     }
+// }
 
 
 
@@ -497,7 +477,7 @@ function setupKeyListeners() {
             }
             // F
             case 70: {
-                console.log(findPath());
+                // console.log(findPath());
                 break;
             }
         }
