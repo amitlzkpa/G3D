@@ -2,16 +2,34 @@
 
 
 
-Array.prototype.remove = function(item) {
-    var idx = -1;
-    for (var i=0; i<this.length; i++) {
-        if (this[i].equals(item.getNodeID())) idx = i;
-    }
-    if (idx < 0) {
-        throw "Item not in graph";
-        return;
-    }
-    this.splice(idx,1);
+
+var bridge;
+
+
+
+function setupBridge() {
+    bridge = new BRIDGE();
+}
+
+
+var BRIDGE = function() {
+    this.selectedNodeNameUIDest = $("#selectedNodeNameUIDest");
+    this.selectedNodeIDUIDest = $("#selectedNodeIDUIDest");
+    this.selectedNodeDataUIDest = $("#selectedNodeDataUIDest");
+    this.selectedNodeNeighboursUIDest = $("#selectedNodeNeighboursUIDest");
+}
+
+
+BRIDGE.prototype.onNodeSelect = function(node) {
+    this.selectedNodeNameUIDest.text(node.getNodeName());
+    this.selectedNodeIDUIDest.text(node.getNodeID());
+    this.selectedNodeDataUIDest.text(node.getNodeData());
+    var nbDst = this.selectedNodeNeighboursUIDest;
+    nbDst.empty();
+    var nbs = node.getNodeNeighbours();
+    $.each(nbs, function(idx, val) {
+        nbDst.append("<li>" + val.getNodeName() + "</li>");
+    });
 }
 
 
@@ -79,6 +97,10 @@ function getBoxMesh(width, height, depth, color) {
 
 var highLightColor = new THREE.Color("rgb(255, 0, 0)");
 var normalColor = new THREE.Color("rgb(255, 255, 0)");
+var neightbourHighlightColor = new THREE.Color("rgb(0, 255, 0)");
+
+var defaultLineColor = new THREE.Color("rgb(100, 100, 100)");
+var highlightLineColor = new THREE.Color("rgb(0, 0, 0)");
 
 
 function Node(nodeID, nodeName, nodeData, nodeNeighbours) {
@@ -131,6 +153,11 @@ Node.prototype.toString = function() {
 
 Node.prototype.onHoverIn = function(){
     this.material.color = highLightColor;
+    var nbs = this.getNodeNeighbours();
+    for (var i=0; i<nbs.length; i++) {
+        nbs[i].material.color = neightbourHighlightColor;
+    }
+    bridge.onNodeSelect(this);
 }
 
 
@@ -140,6 +167,10 @@ Node.prototype.onHoverStay = function(){
 
 Node.prototype.onHoverOut = function(){
     this.material.color = normalColor;
+    var nbs = this.getNodeNeighbours();
+    for (var i=0; i<nbs.length; i++) {
+        nbs[i].material.color = normalColor;
+    }
 }
 
 
@@ -377,7 +408,7 @@ function addEdges(graph) {
         var nodeNeighbours = node.getNodeNeighbours();
         for (var i=0; i<nodeNeighbours.length; i++) {
             var n = nodeNeighbours[i];
-            var edge = getLine(srcNodePos, n.position,  DEFAULT_LINE_COLOR);
+            var edge = getLine(srcNodePos, n.position,  defaultLineColor);
             scene.add(edge);
         }
     }
@@ -491,4 +522,6 @@ function setupKeyListeners() {
 
 
 //-----------------------------------------------------------------------------
+
+
 

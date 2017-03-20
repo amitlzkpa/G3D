@@ -2,31 +2,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no"/>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Graph 3D</title>
 
-	<link rel="stylesheet" href="">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+	<link rel="stylesheet" href="{% static 'css/style.css' %}">
 
 	<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</head>
+
+
+<body>
+
+	<div class="container-fluid">
+		<div class="row">
+
+			<div class="col-xs-8" id="viewport">
+			</div>
+	
+			<div class="col-xs-4">
+				<h1>G3D</h1>
+				<p>An interative 3D <a href="https://en.wikipedia.org/wiki/Graph_(abstract_data_type)">Graph</a> visualizer.</p>
+
+
+				<ul class="nav nav-tabs nav-justified">
+					<li role="presentation" class="active"><a href="#explore">Explore</a></li>
+					<li role="presentation"><a href="#paths">Paths</a></li>
+				</ul>
+
+
+
+				<div class="tab-content">
+					<div role="tabpanel" class="tab-pane active" id="explore">
+
+					<br>
+						<div class="panel panel-primary">
+							<div class="panel-heading">
+								<h3 id="selectedNodeNameUIDest" class="panel-title"></h3>
+							</div>
+							<div class="panel-body">
+								<p id="selectedNodeIDUIDest"></p>
+								<p id="selectedNodeDataUIDest"></p>
+
+								<ul id="selectedNodeNeighboursUIDest"></ul>
+							</div>
+						</div>
+
+
+
+						
+					</div>
+
+					<div role="tabpanel" class="tab-pane" id="paths">
+						
+					</div>
+				</div>
+
+
+
+			</div>
+
+
+
+
+		</div>
+	</div>
+
+
 	<script src="{% static 'js/three.js/build/three.js' %}"></script>
 	<script src="{% static 'js/three.js/examples/js/exporters/OBJExporter.js' %}"></script>
 	<script src="{% static 'js/js-priority-queue/priority-queue.js' %}"></script>
 	<script src="{% static 'js/OrbitControls.js' %}"></script>
 	<script src="{% static 'js/mySceneSetup.js' %}"></script>
 	<script src="{% static 'js/graph.js' %}"></script>
-</head>
-
-
-<body>
-
-
-	<div id="viewport"></div>
-
-
 	<script type="text/javascript">
 		initScene();
 		setupKeyListeners();
+		setupBridge();
 	</script>
 
 

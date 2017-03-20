@@ -2,10 +2,6 @@
 var stopRunning;
 
 
-var DEFAULT_LINE_COLOR = 0xBDBDBD;
-var DEFAULT_OBJECT_COLOR = 0xE91E63;
-var HIGHLIGHT_OBJECT_COLOR = 0x8D1243;
-
 
 
 
@@ -24,45 +20,46 @@ Array.prototype.remove = function() {
 
 
 
+function addGridPlane() {
+    var planeW = 200; // pixels
+    var planeH = 200; // pixels 
+    var numW = 3; // how many wide (50*50 = 2500 pixels wide)
+    var numH = 3; // how many tall (50*50 = 2500 pixels tall)
+    var plane = new THREE.Mesh(
+        new THREE.PlaneGeometry( planeW*numW, planeH*numH, planeW, planeH ),
+        new THREE.MeshBasicMaterial( {
+            color: 0xBDBDBD,
+            wireframe: true
+        } )
+    );
+    plane.rotation.set(Math.PI/2, 0, Math.PI/2);
+
+    scene.add(plane);
+}
+
 
 
 
 var scene, camera;
 function initScene() {
 
-    function addGridPlane() {
-        var planeW = 200; // pixels
-        var planeH = 200; // pixels 
-        var numW = 3; // how many wide (50*50 = 2500 pixels wide)
-        var numH = 3; // how many tall (50*50 = 2500 pixels tall)
-        var plane = new THREE.Mesh(
-            new THREE.PlaneGeometry( planeW*numW, planeH*numH, planeW, planeH ),
-            new THREE.MeshBasicMaterial( {
-                color: 0xBDBDBD,
-                wireframe: true
-            } )
-        );
-        plane.rotation.set(Math.PI/2, 0, Math.PI/2);
-
-        scene.add(plane);
-    }
-
     var initScene, renderer;
     var raycaster, mouse;
+    var WIDTH_FACTOR = 0.64;
 
 
     function onMouseMove( event ) {
         // calculate mouse position in normalized device coordinates
         // (-1 to +1) for both components
-        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+        mouse.x = ( event.clientX / (window.innerWidth * WIDTH_FACTOR) ) * 2 - 1;
         mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
     }
 
 
     function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.aspect = (window.innerWidth * WIDTH_FACTOR) / window.innerHeight;
         camera.updateProjectionMatrix();
-        renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.setSize( (window.innerWidth * WIDTH_FACTOR), window.innerHeight );
     }
 
     
@@ -71,7 +68,7 @@ function initScene() {
     
     initScene = function() {
         renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.setSize( (window.innerWidth * WIDTH_FACTOR), window.innerHeight );
         renderer.setClearColor( 0xfffcf3, 1 );
         document.getElementById( 'viewport' ).appendChild( renderer.domElement );
 
@@ -79,7 +76,7 @@ function initScene() {
 
         camera = new THREE.PerspectiveCamera(
             35,
-            window.innerWidth / window.innerHeight,
+            (window.innerWidth * WIDTH_FACTOR) / window.innerHeight,
             1,
             10000
         );
@@ -95,8 +92,8 @@ function initScene() {
         scene.add(dirLight);
 
         raycaster = new THREE.Raycaster();
-        raycaster.lineprecision = 0.00001;
-        raycaster.precision = 0.001;
+        raycaster.lineprecision = 200;
+        raycaster.precision = 200;
 
         mouse = new THREE.Vector2();
         window.addEventListener( 'mousemove', onMouseMove, false );
