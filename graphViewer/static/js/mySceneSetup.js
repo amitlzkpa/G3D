@@ -48,6 +48,15 @@ function initScene() {
     var WIDTH_FACTOR = 0.64;
 
 
+    function onMouseClick( event ) {
+        raycaster.setFromCamera( mouse, camera );
+        var intersects = raycaster.intersectObjects( scene.children );
+        if (intersects.length > 1 && intersects[0].object.isNode) {
+            intersects[0].object.onClick();
+        }
+    }
+
+
     function onMouseMove( event ) {
         // calculate mouse position in normalized device coordinates
         // (-1 to +1) for both components
@@ -97,6 +106,7 @@ function initScene() {
 
         mouse = new THREE.Vector2();
         window.addEventListener( 'mousemove', onMouseMove, false );
+        window.addEventListener( 'click', onMouseClick, false );
         window.addEventListener( 'resize', onWindowResize, false );
 
         addGridPlane();
@@ -116,9 +126,6 @@ function initScene() {
             if (prevHighlight != null) prevHighlight.onHoverOut();
             if (currHighlight != null) currHighlight.onHoverIn();
         }
-        // if(currHighlight.__proto__.hasOwnProperty('onHoverIn')) {
-        //     currHighlight.onHoverIn();
-        // }
         prevHighlight = currHighlight;
     }
 

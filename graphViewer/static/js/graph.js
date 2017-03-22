@@ -13,6 +13,7 @@ function setupBridge() {
 
 
 var BRIDGE = function() {
+    this.selectedNode = null;
     this.selectedNodeNameUIDest = $("#selectedNodeNameUIDest");
     this.selectedNodeIDUIDest = $("#selectedNodeIDUIDest");
     this.selectedNodeDataUIDest = $("#selectedNodeDataUIDest");
@@ -20,16 +21,23 @@ var BRIDGE = function() {
 }
 
 
-BRIDGE.prototype.onNodeSelect = function(node) {
-    this.selectedNodeNameUIDest.text(node.getNodeName());
-    this.selectedNodeIDUIDest.text(node.getNodeID());
-    this.selectedNodeDataUIDest.text(node.getNodeData());
+BRIDGE.prototype.reportSelectNodeChange = function() {
+    this.selectedNodeNameUIDest.text(this.selectedNode.getNodeName());
+    this.selectedNodeIDUIDest.text('#' + this.selectedNode.getNodeID());
+    this.selectedNodeDataUIDest.text(this.selectedNode.getNodeData());
     var nbDst = this.selectedNodeNeighboursUIDest;
     nbDst.empty();
-    var nbs = node.getNodeNeighbours();
+    var nbs = this.selectedNode.getNodeNeighbours();
     $.each(nbs, function(idx, val) {
-        nbDst.append("<li>" + val.getNodeName() + "</li>");
+        nbDst.append("<span class='grey-box'>" + val.getNodeName() + "</span>");
     });
+}
+
+
+BRIDGE.prototype.setSelectedNode = function(node) {
+    if (this.selectedNode != null) this.selectedNode.onUnClick();
+    this.selectedNode = node;
+    this.reportSelectNodeChange();
 }
 
 
@@ -87,9 +95,10 @@ function getBoxMesh(width, height, depth, color) {
 
 
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 
 
@@ -104,12 +113,13 @@ var highlightLineColor = new THREE.Color("rgb(0, 0, 0)");
 
 
 function Node(nodeID, nodeName, nodeData, nodeNeighbours) {
-    this.isNode = true;
     this.type = 'Node';
-    this.nodeID = nodeID;
-    this.nodeName = nodeName;
-    this.nodeData = nodeData;
-    this.nodeNeighbours = nodeNeighbours;
+    this.isNode = true;
+    this.nodeInfo = {};
+    this.nodeInfo.nodeID = nodeID;
+    this.nodeInfo.nodeName = nodeName;
+    this.nodeInfo.nodeData = nodeData;
+    this.nodeInfo.nodeNeighbours = nodeNeighbours;
     this.geometry = new THREE.SphereGeometry(1, 32, 32);
     this.material = new THREE.MeshBasicMaterial({color: normalColor});
     THREE.Mesh.call( this, this.geometry, this.material );
@@ -117,47 +127,40 @@ function Node(nodeID, nodeName, nodeData, nodeNeighbours) {
 
 
 
-// Node.prototype.isNode = true;
 Node.prototype = Object.create( THREE.Mesh.prototype );
 Node.prototype.constructor = Node;
 
 Node.prototype.getNodeID = function() {
-    return this.nodeID;
+    return this.nodeInfo.nodeID;
 }
 
 Node.prototype.getNodeName = function() {
-    return this.nodeName;
+    return this.nodeInfo.nodeName;
 }
 
 Node.prototype.getNodeData = function() {
-    return this.nodeData;
+    return this.nodeInfo.nodeData;
 }
 
 Node.prototype.getNodeNeighbours = function() {
-    return this.nodeNeighbours;
+    return this.nodeInfo.nodeNeighbours;
 }
 
 Node.prototype.setNodeNeighbours = function(neightbourArray) {
-    this.nodeNeighbours = neightbourArray;
+    this.nodeInfo.nodeNeighbours = neightbourArray;
 }
 
 Node.prototype.equals = function(otherNode) {
     if (!(otherNode instanceof Node)) return false;
-    return this.nodeID == otherNode.getNodeID();
+    return this.nodeInfo.nodeID == otherNode.getNodeID();
 }
 
 Node.prototype.toString = function() {
-    return "[" + this.nodeID + " - " + this.nodeName + "]-->" + this.nodeNeighbours.toString();
+    return "[" + this.nodeInfo.nodeID + " - " + this.nodeInfo.nodeName + "]-->" + this.nodeInfo.nodeNeighbours.toString();
 }
 
 
 Node.prototype.onHoverIn = function(){
-    this.material.color = highLightColor;
-    var nbs = this.getNodeNeighbours();
-    for (var i=0; i<nbs.length; i++) {
-        nbs[i].material.color = neightbourHighlightColor;
-    }
-    bridge.onNodeSelect(this);
 }
 
 
@@ -166,6 +169,30 @@ Node.prototype.onHoverStay = function(){
 
 
 Node.prototype.onHoverOut = function(){
+}
+
+
+Node.prototype.onClick = function(){
+    this.highlight();
+}
+
+
+Node.prototype.onUnClick = function(){
+    this.clearHighlight();
+}
+
+
+Node.prototype.highlight = function() {
+    this.material.color = highLightColor;
+    var nbs = this.getNodeNeighbours();
+    for (var i=0; i<nbs.length; i++) {
+        nbs[i].material.color = neightbourHighlightColor;
+    }
+    // bridge.setSelectedNode(this);
+}
+
+
+Node.prototype.clearHighlight = function() {
     this.material.color = normalColor;
     var nbs = this.getNodeNeighbours();
     for (var i=0; i<nbs.length; i++) {
