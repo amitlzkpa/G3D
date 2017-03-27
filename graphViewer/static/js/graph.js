@@ -22,13 +22,14 @@ var BRIDGE = function() {
 
 
 BRIDGE.prototype.reportSelectNodeChange = function() {
-    this.selectedNodeNameUIDest.text(this.selectedNode.getNodeName());
-    this.selectedNodeIDUIDest.text('#' + this.selectedNode.getNodeID());
-    this.selectedNodeDataUIDest.text(this.selectedNode.getNodeData());
+    this.selectedNodeNameUIDest.html(this.selectedNode.getNodeName());
+    this.selectedNodeIDUIDest.html('#' + this.selectedNode.getNodeID());
+    this.selectedNodeDataUIDest.html(this.selectedNode.readData(this.selectedNode.getNodeData()));
     var nbDst = this.selectedNodeNeighboursUIDest;
     nbDst.empty();
     var nbs = this.selectedNode.getNodeNeighbours();
     $.each(nbs, function(idx, val) {
+        if (!val) return;
         nbDst.append("<span class='grey-box'>" + val.getNodeName() + "</span>");
     });
 }
@@ -173,7 +174,12 @@ Node.prototype.onHoverOut = function(){
 
 
 Node.prototype.onClick = function(){
-    this.highlight();
+    this.primaryHighlight();
+    var nbs = this.getNodeNeighbours();
+    for (var i=0; i<nbs.length; i++) {
+        if (!nbs[i]) continue;
+        nbs[i].secondaryHighlight();
+    }
 }
 
 
@@ -182,13 +188,31 @@ Node.prototype.onUnClick = function(){
 }
 
 
-Node.prototype.highlight = function() {
-    this.material.color = highLightColor;
-    var nbs = this.getNodeNeighbours();
-    for (var i=0; i<nbs.length; i++) {
-        nbs[i].material.color = neightbourHighlightColor;
+Node.prototype.readData = function(data) {
+    var links = data.split(',');
+    var retText = "";
+    for(var i=0; i<links.length; i++) {
+        retText += ("<a href='#'>" + links[i] + "</a></br>");
     }
-    // bridge.setSelectedNode(this);
+    return retText;
+}
+
+
+
+
+
+//---------------------------------
+
+
+
+Node.prototype.primaryHighlight = function() {
+    this.material.color = highLightColor;
+    bridge.setSelectedNode(this);
+}
+
+
+Node.prototype.secondaryHighlight = function() {
+    this.material.color = neightbourHighlightColor;
 }
 
 
@@ -196,6 +220,7 @@ Node.prototype.clearHighlight = function() {
     this.material.color = normalColor;
     var nbs = this.getNodeNeighbours();
     for (var i=0; i<nbs.length; i++) {
+        if (!nbs[i]) continue;
         nbs[i].material.color = normalColor;
     }
 }
@@ -223,19 +248,19 @@ var testGraph = [
                     {
                         "nodeName": "A",
                         "nodeID": 01,
-                        "nodeData": "fooA",
+                        "nodeData": "fooA,gooA",
                         "nodeNeighbours": [02, 03]
                     },
                     {
                         "nodeName": "B",
                         "nodeID": 02,
-                        "nodeData": "fooB",
+                        "nodeData": "fooB,gooB",
                         "nodeNeighbours": [01, 03]
                     },
                     {
                         "nodeName": "C",
                         "nodeID": 03,
-                        "nodeData": "fooC",
+                        "nodeData": "fooC,gooC",
                         "nodeNeighbours": [01, 02, 04, 05]
                     },
                     {
@@ -247,31 +272,31 @@ var testGraph = [
                     {
                         "nodeName": "E",
                         "nodeID": 05,
-                        "nodeData": "fooE",
+                        "nodeData": "fooE,gooE",
                         "nodeNeighbours": [03, 04, 07]
                     },
                     {
                         "nodeName": "F",
                         "nodeID": 06,
-                        "nodeData": "fooF",
+                        "nodeData": "fooF,gooF",
                         "nodeNeighbours": [04, 08]
                     },
                     {
                         "nodeName": "G",
                         "nodeID": 07,
-                        "nodeData": "fooG",
+                        "nodeData": "fooG,gooG,hooG",
                         "nodeNeighbours": [05, 08]
                     },
                     {
                         "nodeName": "H",
                         "nodeID": 08,
-                        "nodeData": "fooH",
+                        "nodeData": "",
                         "nodeNeighbours": [06, 07, 09]
                     },
                     {
                         "nodeName": "I",
                         "nodeID": 09,
-                        "nodeData": "fooI",
+                        "nodeData": "fooI,gooI",
                         "nodeNeighbours": [08]
                     }
                 ];
@@ -299,12 +324,22 @@ function isValidGraphData(nodeData) {
 
 
 
+function readObjectAsArray(inp) {
+    // var array = $.map(inp, function(value, index) {
+    //     return [value];
+    // });
+    // return array;
+    return Object.keys(inp).map(key => inp[key]);
+}
+
+
+
 class Graph {
-    constructor(textDataForGraph) {
+    constructor(dataForGraph) {
         this.graphLibrary = {};
         this.graphArray = [];
-        for (var i=0; i<textDataForGraph.length; i++) {
-            var textDataForNode = textDataForGraph[i];
+        for (var i=0; i<dataForGraph.length; i++) {
+            var textDataForNode = dataForGraph[i];
             var objectForNode = new Node(textDataForNode['nodeID'],
                                          textDataForNode['nodeName'],
                                          textDataForNode['nodeData'],
@@ -321,9 +356,7 @@ class Graph {
             }
             this.graphArray[i].setNodeNeighbours(neighbourObjects);
         }
-
         this.graphArray = this.graphArray.sort(function(a, b) { return b.getNodeNeighbours().length - a.getNodeNeighbours().length; });
-        // console.log(this.graphArray);
     }
 
 
@@ -387,12 +420,12 @@ class GraphIterator {
 var graph;
 
 
-function graphRun(){
-    var textDataForGraph = getTextData();
-    if (isValidGraphData(textDataForGraph)) {
-        graph = new Graph(textDataForGraph);
+function graphRun(textDataForGraph){
+    textDataForGraph = textDataForGraph.replace(/&quot;/g,'"');
+    jsonDataForGraph = JSON.parse(textDataForGraph);
+    if (isValidGraphData(jsonDataForGraph)) {
+        graph = new Graph(jsonDataForGraph);
         addGraphToScene(graph);
-
     }
 }
 
@@ -435,6 +468,7 @@ function addEdges(graph) {
         var nodeNeighbours = node.getNodeNeighbours();
         for (var i=0; i<nodeNeighbours.length; i++) {
             var n = nodeNeighbours[i];
+            if (!n) continue;
             var edge = getLine(srcNodePos, n.position,  defaultLineColor);
             scene.add(edge);
         }
@@ -530,7 +564,7 @@ function setupKeyListeners() {
             }
             // G
             case 71: {
-                graphRun();
+                // graphRun();
                 break;
             }
             // F
