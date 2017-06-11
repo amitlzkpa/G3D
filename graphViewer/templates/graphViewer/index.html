@@ -87,8 +87,13 @@
 	<script type="text/javascript">
 		initScene();
 		setupKeyListeners();
-		setupBridge();
-		graphRun('{{ graphData }}');
+		var graph;
+		var textDataForGraph = '{{ graphData }}';
+	    textDataForGraph = textDataForGraph.replace(/&quot;/g,'"');
+	    jsonDataForGraph = JSON.parse(textDataForGraph);
+	    if (isValidGraphData(jsonDataForGraph)) {
+	    	runGraph(graph);
+	    }
 	</script>
 
 

@@ -3,42 +3,102 @@
 
 
 
-var bridge;
 
-
-
-function setupBridge() {
+function runGraph(graph) {
+    graph = new Graph(jsonDataForGraph);
+    three = new ThreeG3DEnv();
+    three.initialize();
     bridge = new BRIDGE();
+    bridge.setGraph(graph);
+	webHTML = new graphListener();
+    bridge.registerListener(webHTML);
+    bridge.reload();
 }
 
 
-var BRIDGE = function() {
-    this.selectedNode = null;
+
+
+
+function graphListener() {
     this.selectedNodeNameUIDest = $("#selectedNodeNameUIDest");
     this.selectedNodeIDUIDest = $("#selectedNodeIDUIDest");
     this.selectedNodeDataUIDest = $("#selectedNodeDataUIDest");
     this.selectedNodeNeighboursUIDest = $("#selectedNodeNeighboursUIDest");
+    this.reportSelectNodeChange = function(node) {
+        // console.log(node.getNodeName());
+        // console.log(node.getNodeNeighbours().length);
+        this.selectedNodeNameUIDest.html(node.getNodeName());
+        this.selectedNodeIDUIDest.html(node.getNodeID());
+        this.selectedNodeDataUIDest.html(node.readData(node.getNodeData()));
+        var nbDst = this.selectedNodeNeighboursUIDest;
+        nbDst.empty();
+        var nbs = node.getNodeNeighbours();
+        $.each(nbs, function(idx, val) {
+            if (!val) return;
+            nbDst.append("<div class='grey-box'>" + val.getNodeName() + "</div>");
+        });
+    }
 }
 
 
-BRIDGE.prototype.reportSelectNodeChange = function() {
-    this.selectedNodeNameUIDest.html(this.selectedNode.getNodeName());
-    this.selectedNodeIDUIDest.html('#' + this.selectedNode.getNodeID());
-    this.selectedNodeDataUIDest.html(this.selectedNode.readData(this.selectedNode.getNodeData()));
-    var nbDst = this.selectedNodeNeighboursUIDest;
-    nbDst.empty();
-    var nbs = this.selectedNode.getNodeNeighbours();
-    $.each(nbs, function(idx, val) {
-        if (!val) return;
-        nbDst.append("<span class='grey-box'>" + val.getNodeName() + "</span>");
-    });
+
+
+
+
+
+
+//-----------------------------------------------------------------------------
+
+
+
+
+
+
+
+var BRIDGE = function(graph) {
+	this.graph = null;
+    this.selectedNode = null;
+    this.changeListeners = [];
+}
+
+
+BRIDGE.prototype.reload = function() {
+	reloadScene();
+}
+
+
+BRIDGE.prototype.setGraph = function(graph) {
+	this.graph = graph;
 }
 
 
 BRIDGE.prototype.setSelectedNode = function(node) {
     if (this.selectedNode != null) this.selectedNode.onUnClick();
     this.selectedNode = node;
-    this.reportSelectNodeChange();
+    this.selectedNode.onClick();
+    for (var i=0; i<this.changeListeners.length; i++) {
+        this.changeListeners[i].reportSelectNodeChange(this.selectedNode);
+    }
+}
+
+
+BRIDGE.prototype.registerListener = function(listener) {
+    if (!listener.hasOwnProperty('reportSelectNodeChange')) {
+        throw "Listener must have method named 'reportSelectNodeChange(node)' accepting a node as parameter.";
+    }
+    this.changeListeners.push(listener);
+}
+
+
+BRIDGE.prototype.deregisterListener = function(listener) {
+    var remIdx = -1;
+    for (var i=0; i<this.changeListeners.length; i++) {
+        if (this.changeListeners[i] == listener) remIdx = i;
+    }
+    if (remIdx == -1) {
+        throw "Attempting to remove an unregistered listener.";
+    }
+    this.changeListeners.splice(remIdx, 1);
 }
 
 
@@ -77,24 +137,6 @@ function getLine(start, end, lineColor) {
     var line = new THREE.Line( geometry, material );
     return line;
 }
-
-
-function getSphereMesh(radius, wSegs, hSegs, color) {
-    var geometry = new THREE.SphereGeometry(radius, wSegs, hSegs);
-    var material = new THREE.MeshBasicMaterial({color: color});
-    var sphere = new THREE.Mesh(geometry, material);
-    return sphere;
-}
-
-
-function getBoxMesh(width, height, depth, color) {
-    var geometry = new THREE.BoxGeometry(width, height, depth);
-    var material = new THREE.MeshBasicMaterial( {color: color} );
-    var cube = new THREE.Mesh( geometry, material );
-    return cube;
-}
-
-
 
 
 
@@ -174,26 +216,34 @@ Node.prototype.onHoverOut = function(){
 
 
 Node.prototype.onClick = function(){
-    this.primaryHighlight();
     var nbs = this.getNodeNeighbours();
     for (var i=0; i<nbs.length; i++) {
-        if (!nbs[i]) continue;
+        if (!nbs[i] || nbs[i].getNodeID()==this.getNodeID()) continue;
         nbs[i].secondaryHighlight();
     }
+    this.primaryHighlight();
 }
 
 
 Node.prototype.onUnClick = function(){
+    var nbs = this.getNodeNeighbours();
+    for (var i=0; i<nbs.length; i++) {
+        if (!nbs[i]) continue;
+        nbs[i].clearHighlight();
+    }
     this.clearHighlight();
 }
 
 
 Node.prototype.readData = function(data) {
-    var links = data.split(',');
+	// jsonData = JSON.parse(data);
+    // var links = data.split(',');
     var retText = "";
-    for(var i=0; i<links.length; i++) {
-        retText += ("<a href='#'>" + links[i] + "</a></br>");
-    }
+    // for(var i=0; i<links.length; i++) {
+    //     retText += ("<a href='#'>" + links[i] + "</a></br>");
+    // }
+    retText = data['introText']
+	// console.log(retText);
     return retText;
 }
 
@@ -207,7 +257,6 @@ Node.prototype.readData = function(data) {
 
 Node.prototype.primaryHighlight = function() {
     this.material.color = highLightColor;
-    bridge.setSelectedNode(this);
 }
 
 
@@ -218,11 +267,6 @@ Node.prototype.secondaryHighlight = function() {
 
 Node.prototype.clearHighlight = function() {
     this.material.color = normalColor;
-    var nbs = this.getNodeNeighbours();
-    for (var i=0; i<nbs.length; i++) {
-        if (!nbs[i]) continue;
-        nbs[i].material.color = normalColor;
-    }
 }
 
 
@@ -233,13 +277,6 @@ Node.prototype.clearHighlight = function() {
 
 //---------------------------------------------------------
 
-
-
-
-// "nodeName" = "nodeName";
-// "nodeID" = "nodeID";
-// "nodeData" = "nodeData";
-// "nodeNeighbours" = "nodeNeighbours";
 
 
 
@@ -322,15 +359,6 @@ function isValidGraphData(nodeData) {
 
 //---------------------------------------------------------
 
-
-
-function readObjectAsArray(inp) {
-    // var array = $.map(inp, function(value, index) {
-    //     return [value];
-    // });
-    // return array;
-    return Object.keys(inp).map(key => inp[key]);
-}
 
 
 
@@ -417,16 +445,29 @@ class GraphIterator {
 //---------------------------------------------------------
 
 
-var graph;
+
+class ThreeG3DEnv {
+	constructor() {
+		this.nodeGroup = null;
+		this.edgeGroup = null;
+		this.graphGroup = null;
+	}
+}
 
 
-function graphRun(textDataForGraph){
-    textDataForGraph = textDataForGraph.replace(/&quot;/g,'"');
-    jsonDataForGraph = JSON.parse(textDataForGraph);
-    if (isValidGraphData(jsonDataForGraph)) {
-        graph = new Graph(jsonDataForGraph);
-        addGraphToScene(graph);
-    }
+
+
+function initialize() {
+	nodeGroup = THREE.Group();
+	edgeGroup = THREE.Group();
+	graphGroup = THREE.Group();
+
+}
+
+
+function run() {
+	removeGraphFromScene();
+    addGraphToScene(this.graph);
 }
 
 
@@ -451,10 +492,11 @@ function addNodes(graph) {
     var gIterator = graph.getIterator();
     while (!gIterator.end()) {
         var node = gIterator.nextNode();
-        var randomPos = getRandomPointNearPt(new THREE.Vector3(), 20);
+        var randomPos = getRandomPointNearPt(node.position, 20);
         node.position.set(randomPos.x, randomPos.y, randomPos.z);
-        scene.add(node);
+	    nodeGroup.add(node);
     }
+    graphGroup.add(nodeGroup);
 }
 
 
@@ -470,9 +512,22 @@ function addEdges(graph) {
             var n = nodeNeighbours[i];
             if (!n) continue;
             var edge = getLine(srcNodePos, n.position,  defaultLineColor);
-            scene.add(edge);
+            edgeGroup.add(edge);
         }
     }
+    graphGroup.add(edgeGroup);
+}
+
+
+function reloadScene() {
+	removeGraphFromScene();
+    addGraphToScene(this.graph);
+}
+
+
+
+function removeGraphFromScene() {
+    scene.remove(graphGroup);
 }
 
 
@@ -481,6 +536,7 @@ function addEdges(graph) {
 function addGraphToScene(graph) {
     addNodes(graph);
     addEdges(graph);
+    scene.add(graphGroup);
     // var spritey = makeTextSprite( "Amit", 
     //     { fontsize: 24, borderColor: {r:0, g:0, b:0, a:0}, backgroundColor: {r:255, g:255, b:255, a:0.6} } );
     // spritey.position.set(0,0,10);

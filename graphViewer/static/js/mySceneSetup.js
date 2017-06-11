@@ -40,6 +40,7 @@ function addGridPlane() {
 
 
 
+var bridge;
 var scene, camera;
 function initScene() {
 
@@ -52,7 +53,7 @@ function initScene() {
         raycaster.setFromCamera( mouse, camera );
         var intersects = raycaster.intersectObjects( scene.children );
         if (intersects.length > 1 && intersects[0].object.isNode) {
-            intersects[0].object.onClick();
+            bridge.setSelectedNode(intersects[0].object);
         }
     }
 

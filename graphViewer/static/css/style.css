@@ -1,6 +1,4 @@
 .grey-box {
-	width: 80px;
-	height: 60px;
 	background-color: #EBEBEB;
 	padding: 8px;
 	text-align: middle;
@@ -25,7 +23,7 @@
 
 
 #selectedNodeDataUIDest {
-	height: 120px;
+	height: 320px;
 	overflow-x: hidden;
 	overflow-y: auto;
 }
@@ -40,7 +38,7 @@
 
 
 #selectedNodeNeighboursUIDest {
-	overflow-x: auto;
-	overflow-y: hidden;
-	height: 40px;
+	height: 240px;
+	overflow-x: hidden;
+	overflow-y: auto;
 }

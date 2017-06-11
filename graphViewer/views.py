@@ -13,60 +13,60 @@ import sys
 
 def getTestGraph():
 	testGraph = [
-	{
-	"nodeName": "A",
-	"nodeID": 1,
-	"nodeData": "fooA,gooA",
-	"nodeNeighbours": [2, 3]
-	},
-	{
-	"nodeName": "B",
-	"nodeID": 2,
-	"nodeData": "fooB,gooB",
-	"nodeNeighbours": [1, 3]
-	},
-	{
-	"nodeName": "C",
-	"nodeID": 3,
-	"nodeData": "fooC,gooC",
-	"nodeNeighbours": [1, 2, 4, 5]
-	},
-	{
-	"nodeName": "D",
-	"nodeID": 4,
-	"nodeData": "fooD",
-	"nodeNeighbours": [3, 5, 6]
-	},
-	{
-	"nodeName": "E",
-	"nodeID": 5,
-	"nodeData": "fooE,gooE",
-	"nodeNeighbours": [3, 4, 7]
-	},
-	{
-	"nodeName": "F",
-	"nodeID": 6,
-	"nodeData": "fooF,gooF",
-	"nodeNeighbours": [4, 8]
-	},
-	{
-	"nodeName": "G",
-	"nodeID": 7,
-	"nodeData": "fooG,gooG,hooG",
-	"nodeNeighbours": [5, 8]
-	},
-	{
-	"nodeName": "H",
-	"nodeID": 8,
-	"nodeData": "",
-	"nodeNeighbours": [6, 7, 9]
-	},
-	{
-	"nodeName": "I",
-	"nodeID": 9,
-	"nodeData": "fooI,gooI",
-	"nodeNeighbours": [8]
-	}
+		{
+		"nodeName": "A",
+		"nodeID": 1,
+		"nodeData": "fooA,gooA",
+		"nodeNeighbours": [2, 3]
+		},
+		{
+		"nodeName": "B",
+		"nodeID": 2,
+		"nodeData": "fooB,gooB",
+		"nodeNeighbours": [1, 3]
+		},
+		{
+		"nodeName": "C",
+		"nodeID": 3,
+		"nodeData": "fooC,gooC",
+		"nodeNeighbours": [1, 2, 4, 5]
+		},
+		{
+		"nodeName": "D",
+		"nodeID": 4,
+		"nodeData": "fooD",
+		"nodeNeighbours": [3, 5, 6]
+		},
+		{
+		"nodeName": "E",
+		"nodeID": 5,
+		"nodeData": "fooE,gooE",
+		"nodeNeighbours": [3, 4, 7]
+		},
+		{
+		"nodeName": "F",
+		"nodeID": 6,
+		"nodeData": "fooF,gooF",
+		"nodeNeighbours": [4, 8]
+		},
+		{
+		"nodeName": "G",
+		"nodeID": 7,
+		"nodeData": "fooG,gooG,hooG",
+		"nodeNeighbours": [5, 8]
+		},
+		{
+		"nodeName": "H",
+		"nodeID": 8,
+		"nodeData": "",
+		"nodeNeighbours": [6, 7, 9]
+		},
+		{
+		"nodeName": "I",
+		"nodeID": 9,
+		"nodeData": "fooI,gooI",
+		"nodeNeighbours": [8]
+		}
 	]
 	return testGraph
 
@@ -87,12 +87,32 @@ def uprint(*objects, sep=' ', end='\n', file=sys.stdout):
 def getPageData(titleName):
 	titleName = titleName.replace(' ', '%20')
 	titleName = titleName.replace("\u2013", '-')
-	srcLink = 'https://en.wikipedia.org/w/api.php?action=query&titles=%s&prop=links&pllimit=max&format=json' % titleName
+	srcLink = 'https://en.wikipedia.org/w/api.php?action=query&titles=%s&prop=links&pllimit=30&format=json' % titleName
 	pageJSON = None
 	with urllib.request.urlopen(srcLink) as response:
    		pageJSON = response.read().decode('utf-8')
 	pageDict = json.loads(pageJSON)
 	return pageDict
+
+
+def makeData(titleName):
+	titleName = titleName.replace(' ', '%20')
+	titleName = titleName.replace("\u2013", '-')
+	srcLink = 'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=%s' % titleName
+	pageJSON = None
+	with urllib.request.urlopen(srcLink) as response:
+   		pageJSON = response.read().decode('utf-8')
+	pageDict = json.loads(pageJSON)
+	pageIDD, info = pageDict['query']['pages'].popitem()
+	dataDict = {}
+	txt = info['extract']
+	txt = txt.replace('\n', ' ')
+	txt = txt.replace('\"', '\'')
+	dataDict['introText'] = txt
+	dataDict['imageLink'] = "#"
+	# return pageDict
+	return dataDict
+
 
 
 def createDictForNode(pageDict):
@@ -104,15 +124,20 @@ def createDictForNode(pageDict):
 		linkList.append(rawLink['title'])
 		# uprint(link['title'])
 	# uprint(str(pageDict))
-	node = createNode(title, 'foo', linkList)
+	data = makeData(title)
+	node = createNode(title, data, linkList)
 	return node
 
 
 def index(request):
-	# graphData = json.dumps(getTestGraph())
+	# tst = getTestGraph()
+	# uprint(tst[0]['nodeName'])
+	# uprint(len(tst[0]['nodeNeighbours']))
+	# uprint(tst[0]['nodeNeighbours'])
+	# graphData = json.dumps(tst)
 	# return render(request, 'graphViewer/index.html', { 'graphData': graphData })
 	currLvl = 0
-	maxLvl = 3
+	maxLvl = 1
 	workStack = []
 	nodeList = []
 	pageDict = getPageData('Sachin_Tendulkar')
@@ -132,8 +157,6 @@ def index(request):
 			workStack.remove(nbID)
 		except:
 			pass
-	# uprint(nodeA)
-	# uprint(nodeB)
 	graphData = json.dumps(nodeList)
 	return render(request, 'graphViewer/index.html', { 'graphData': graphData })
 
