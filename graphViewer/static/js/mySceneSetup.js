@@ -1,6 +1,7 @@
 
 var stopRunning;
-
+var initCallback;
+var afterStopCallBack;
 
 
 
@@ -49,7 +50,7 @@ function initScene() {
     var WIDTH_FACTOR = 0.64;
 
 
-    function onMouseClick( event ) {
+    function g3dOnMouseClick( event ) {
         raycaster.setFromCamera( mouse, camera );
         var intersects = raycaster.intersectObjects( scene.children );
         if (intersects.length > 1 && intersects[0].object.isNode) {
@@ -58,7 +59,7 @@ function initScene() {
     }
 
 
-    function onMouseMove( event ) {
+    function g3dOnMouseMove( event ) {
         // calculate mouse position in normalized device coordinates
         // (-1 to +1) for both components
         mouse.x = ( event.clientX / (window.innerWidth * WIDTH_FACTOR) ) * 2 - 1;
@@ -66,10 +67,25 @@ function initScene() {
     }
 
 
-    function onWindowResize() {
+    function g3dOnWindowResize() {
         camera.aspect = (window.innerWidth * WIDTH_FACTOR) / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize( (window.innerWidth * WIDTH_FACTOR), window.innerHeight );
+    }
+
+
+    function g3dHookListeners() {
+        mouse = new THREE.Vector2();
+        window.addEventListener( 'mousemove', g3dOnMouseMove, false );
+        window.addEventListener( 'click', g3dOnMouseClick, false );
+        window.addEventListener( 'resize', g3dOnWindowResize, false );
+    }
+
+
+    function g3dUnhookListeners() {
+        window.removeEventListener( 'mousemove', g3dOnMouseMove, false );
+        window.removeEventListener( 'click', g3dOnMouseClick, false );
+        window.removeEventListener( 'resize', g3dOnWindowResize, false );
     }
 
     
@@ -105,12 +121,11 @@ function initScene() {
         raycaster.lineprecision = 200;
         raycaster.precision = 200;
 
-        mouse = new THREE.Vector2();
-        window.addEventListener( 'mousemove', onMouseMove, false );
-        window.addEventListener( 'click', onMouseClick, false );
-        window.addEventListener( 'resize', onWindowResize, false );
+        g3dHookListeners();
 
         addGridPlane();
+        
+        initCallback();
     };
 
 
@@ -133,12 +148,20 @@ function initScene() {
 
 
 
-    fail = false;
+    stop = false;
+    stoppingFrame = false;
 
     function renderScene(){
         var controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.target.set( 0, 0, 0 );
         function render() {
+            if (stop) {
+                if (!stoppingFrame) return;
+                afterStopCallBack();
+                stoppingFrame = false;
+                g3dUnhookListeners();
+                return;
+            }
             // update the picking ray with the camera and mouse position
             raycaster.setFromCamera( mouse, camera );
             var intersects = raycaster.intersectObjects( scene.children );
@@ -160,7 +183,8 @@ function initScene() {
 
 
     stopRunning = function() {
-        fail = true;
+        stop = true;
+        stoppingFrame = true;
     }
 
 

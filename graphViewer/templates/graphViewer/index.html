@@ -87,12 +87,11 @@
 	<script type="text/javascript">
 		initScene();
 		setupKeyListeners();
-		var graph;
 		var textDataForGraph = '{{ graphData }}';
 	    textDataForGraph = textDataForGraph.replace(/&quot;/g,'"');
-	    jsonDataForGraph = JSON.parse(textDataForGraph);
+	    var jsonDataForGraph = JSON.parse(textDataForGraph);
 	    if (isValidGraphData(jsonDataForGraph)) {
-	    	runGraph(graph);
+	    	updateGraph(jsonDataForGraph);
 	    }
 	</script>
 

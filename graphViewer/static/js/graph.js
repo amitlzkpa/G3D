@@ -3,22 +3,6 @@
 
 
 
-
-function runGraph(graph) {
-    graph = new Graph(jsonDataForGraph);
-    three = new ThreeG3DEnv();
-    three.initialize();
-    bridge = new BRIDGE();
-    bridge.setGraph(graph);
-	webHTML = new graphListener();
-    bridge.registerListener(webHTML);
-    bridge.reload();
-}
-
-
-
-
-
 function graphListener() {
     this.selectedNodeNameUIDest = $("#selectedNodeNameUIDest");
     this.selectedNodeIDUIDest = $("#selectedNodeIDUIDest");
@@ -41,6 +25,8 @@ function graphListener() {
 }
 
 
+var webHTML = new graphListener();
+
 
 
 
@@ -52,23 +38,10 @@ function graphListener() {
 
 
 
-
-
-
-var BRIDGE = function(graph) {
+var BRIDGE = function() {
 	this.graph = null;
     this.selectedNode = null;
     this.changeListeners = [];
-}
-
-
-BRIDGE.prototype.reload = function() {
-	reloadScene();
-}
-
-
-BRIDGE.prototype.setGraph = function(graph) {
-	this.graph = graph;
 }
 
 
@@ -101,6 +74,15 @@ BRIDGE.prototype.deregisterListener = function(listener) {
     this.changeListeners.splice(remIdx, 1);
 }
 
+
+BRIDGE.prototype.setGraph = function(graph) {
+	this.graph = graph;
+}
+
+
+BRIDGE.prototype.getGraph = function() {
+	return this.graph;
+}
 
 
 
@@ -446,30 +428,7 @@ class GraphIterator {
 
 
 
-class ThreeG3DEnv {
-	constructor() {
-		this.nodeGroup = null;
-		this.edgeGroup = null;
-		this.graphGroup = null;
-	}
-}
-
-
-
-
-function initialize() {
-	nodeGroup = THREE.Group();
-	edgeGroup = THREE.Group();
-	graphGroup = THREE.Group();
-
-}
-
-
-function run() {
-	removeGraphFromScene();
-    addGraphToScene(this.graph);
-}
-
+var graphGroup = new THREE.Group();
 
 
 // src: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
@@ -494,9 +453,10 @@ function addNodes(graph) {
         var node = gIterator.nextNode();
         var randomPos = getRandomPointNearPt(node.position, 20);
         node.position.set(randomPos.x, randomPos.y, randomPos.z);
-	    nodeGroup.add(node);
+        graphGroup.add(node);
+	    scene.add(node);
     }
-    graphGroup.add(nodeGroup);
+    scene.add(graphGroup);
 }
 
 
@@ -512,22 +472,11 @@ function addEdges(graph) {
             var n = nodeNeighbours[i];
             if (!n) continue;
             var edge = getLine(srcNodePos, n.position,  defaultLineColor);
-            edgeGroup.add(edge);
+            graphGroup.add(edge);
+            scene.add(edge);
         }
     }
-    graphGroup.add(edgeGroup);
-}
-
-
-function reloadScene() {
-	removeGraphFromScene();
-    addGraphToScene(this.graph);
-}
-
-
-
-function removeGraphFromScene() {
-    scene.remove(graphGroup);
+    scene.add(graphGroup);
 }
 
 
@@ -536,11 +485,22 @@ function removeGraphFromScene() {
 function addGraphToScene(graph) {
     addNodes(graph);
     addEdges(graph);
-    scene.add(graphGroup);
     // var spritey = makeTextSprite( "Amit", 
     //     { fontsize: 24, borderColor: {r:0, g:0, b:0, a:0}, backgroundColor: {r:255, g:255, b:255, a:0.6} } );
     // spritey.position.set(0,0,10);
     // scene.add( spritey );
+}
+
+
+function clearScene() {
+	console.log("clearing scene");
+    scene.remove(graphGroup);
+}
+
+
+function reloadGraph(graph) {
+	clearScene();
+    addGraphToScene(graph);
 }
 
 
@@ -605,8 +565,28 @@ function addGraphToScene(graph) {
 
 
 
+function updateGraph(jsonDataForGraph) {
+    var graph = new Graph(jsonDataForGraph);
+    bridge.setGraph(graph);
+	reloadGraph(bridge.getGraph());
+}
+
+
+initCallback = function() {
+	console.log("Scene initCallback");
+    bridge = new BRIDGE();
+    bridge.registerListener(webHTML);
+}
+
+
 // called after every frame;
 frameUpdate = function() {
+}
+
+
+// called in the frame after stopping
+afterStopCallBack = function() {
+	console.log("STOP!!");
 }
 
 
@@ -620,7 +600,7 @@ function setupKeyListeners() {
             }
             // G
             case 71: {
-                // graphRun();
+                clearScene();
                 break;
             }
             // F
@@ -631,6 +611,9 @@ function setupKeyListeners() {
         }
     });
 }
+
+
+
 
 
 // Mesh.prototype.onHoverOut()  = function() {
