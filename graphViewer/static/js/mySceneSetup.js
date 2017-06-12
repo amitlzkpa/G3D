@@ -1,6 +1,8 @@
 
 var stopRunning;
+
 var initCallback;
+var loadGraphCallback;
 var afterStopCallBack;
 
 
@@ -17,6 +19,62 @@ Array.prototype.remove = function() {
     }
     return this;
 };
+
+
+
+
+
+
+function quickSearchInit() {
+    $( "input.wikisearch" ).autocomplete({
+      source: function( request, response ) {
+        $.ajax({
+          url: makeQueryURL(request.term),
+          dataType: "json",
+          success: function( data ) {
+            console.log(data);
+          }
+        });
+      },
+      select: function( event, ui ) {
+        // doesn't conform to django url templating system, since links are to be generated dynamically 
+        window.location.href = "/course/" + ui.item.value + "/2015";
+      },
+      messages: {
+          noResults: '',
+          results: function() {}
+      },
+      minLength:3,
+      delay:800
+    });
+}
+
+
+
+
+
+function makeQueryURL(titleName) {
+    titleName = titleName.replace(' ', '%20')
+    titleName = titleName.replace("\u2013", '-')
+    var srcLink = 'https://en.wikipedia.org/w/api.php?action=query&titles=' + titleName + '&prop=links&pllimit=30&format=json';
+    return srcLink;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -52,7 +110,7 @@ function initScene() {
 
     function g3dOnMouseClick( event ) {
         raycaster.setFromCamera( mouse, camera );
-        var intersects = raycaster.intersectObjects( scene.children );
+        var intersects = raycaster.intersectObjects( scene.children, true );
         if (intersects.length > 1 && intersects[0].object.isNode) {
             bridge.setSelectedNode(intersects[0].object);
         }
@@ -124,7 +182,7 @@ function initScene() {
         g3dHookListeners();
 
         addGridPlane();
-        
+
         initCallback();
     };
 

@@ -20,6 +20,11 @@
 <body>
 
 	<div class="container-fluid">
+
+		<div class="row">
+		<input type="text" placeholder="search wikipedia" class="wikisearch">
+		</div>
+
 		<div class="row">
 
 			<div class="col-xs-8" id="viewport">
@@ -83,16 +88,19 @@
 	<script src="{% static 'js/js-priority-queue/priority-queue.js' %}"></script>
 	<script src="{% static 'js/OrbitControls.js' %}"></script>
 	<script src="{% static 'js/mySceneSetup.js' %}"></script>
-	<script src="{% static 'js/graph.js' %}"></script>
+	<script src="{% static 'js/graph-node.js' %}"></script>
+	<script src="{% static 'js/bridge.js' %}"></script>
+	<script src="{% static 'js/scene.js' %}"></script>
 	<script type="text/javascript">
 		initScene();
 		setupKeyListeners();
 		var textDataForGraph = '{{ graphData }}';
 	    textDataForGraph = textDataForGraph.replace(/&quot;/g,'"');
 	    var jsonDataForGraph = JSON.parse(textDataForGraph);
-	    if (isValidGraphData(jsonDataForGraph)) {
+	    if (Graph.isValidGraphData(jsonDataForGraph)) {
 	    	updateGraph(jsonDataForGraph);
 	    }
+	    quickSearchInit();
 	</script>
 
 
