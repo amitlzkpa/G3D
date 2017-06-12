@@ -193,6 +193,25 @@ class Graph {
         }
         return cloneArray;
     }
+
+
+    // UNTESTED
+    findPath(startNodeId, endNodeId) {
+        var start = graph.getNode(startNodeId);
+        var end = graph.getNode(endNodeId);
+        var queue = [];
+        var iter = graph.getIteratorFromNode(start);
+        var nd = iter.nextNode();
+        queue.push(nd);
+        while(queue.length > 0) {
+            nd = queue.pop();
+            var nbrs = nd.getNodeNeighbours();
+            for (var i=0; i<nbrs.length; i++) {
+                queue.push(nbrs[i]);
+                if (end.equals(nbrs[i])) return queue;
+            }
+        }
+    }
 }
 
 

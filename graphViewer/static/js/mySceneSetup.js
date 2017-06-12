@@ -26,7 +26,7 @@ Array.prototype.remove = function() {
 
 
 function quickSearchInit() {
-    $( "input.wikisearch" ).autocomplete({
+    $( "#wikisearch" ).autocomplete({
       source: function( request, response ) {
         $.ajax({
           url: makeQueryURL(request.term),
@@ -37,8 +37,8 @@ function quickSearchInit() {
         });
       },
       select: function( event, ui ) {
-        // doesn't conform to django url templating system, since links are to be generated dynamically 
-        window.location.href = "/course/" + ui.item.value + "/2015";
+        console.log(ui.item.value);
+        // window.location.href = "/course/" + ui.item.value + "/2015";
       },
       messages: {
           noResults: '',
@@ -54,10 +54,12 @@ function quickSearchInit() {
 
 
 function makeQueryURL(titleName) {
-    titleName = titleName.replace(' ', '%20')
-    titleName = titleName.replace("\u2013", '-')
-    var srcLink = 'https://en.wikipedia.org/w/api.php?action=query&titles=' + titleName + '&prop=links&pllimit=30&format=json';
-    return srcLink;
+    console.log(titleName);
+    return 'www.google.com/';
+    // titleName = titleName.replace(' ', '%20')
+    // titleName = titleName.replace("\u2013", '-')
+    // var srcLink = 'https://en.wikipedia.org/w/api.php?action=query&titles=' + titleName + '&prop=links&pllimit=30&format=json';
+    // return srcLink;
 }
 
 

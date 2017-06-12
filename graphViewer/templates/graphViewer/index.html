@@ -13,6 +13,10 @@
 	<link rel="stylesheet" href="{% static 'css/style.css' %}">
 
 	<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+	<script
+  src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"
+  integrity="sha256-xNjb53/rY+WmG+4L6tTl9m6PpqknWZvRt0rO1SRnJzw="
+  crossorigin="anonymous"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 </head>
 
@@ -20,10 +24,6 @@
 <body>
 
 	<div class="container-fluid">
-
-		<div class="row">
-		<input type="text" placeholder="search wikipedia" class="wikisearch">
-		</div>
 
 		<div class="row">
 
@@ -34,6 +34,12 @@
 				<h1>G3D</h1>
 				<p>An interative 3D <a href="https://en.wikipedia.org/wiki/Graph_(abstract_data_type)">Graph</a> visualizer.</p>
 
+				<div class="input-group">
+					<span class="input-group-addon" id="basic-addon1"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></span>
+					<input type="text" placeholder="search wikipedia" id="wikisearch" class="form-control"  aria-describedby="basic-addon1">
+				</div>
+
+				<br>
 
 				<ul class="nav nav-tabs nav-justified">
 					<li role="presentation" class="active"><a href="#explore">Explore</a></li>
@@ -45,7 +51,7 @@
 				<div class="tab-content">
 					<div role="tabpanel" class="tab-pane active" id="explore">
 
-					<br>
+						<br>
 						<div class="panel panel-primary">
 							<div class="panel-heading">
 								<h3 id="selectedNodeNameUIDest" class="panel-title"></h3>
@@ -61,11 +67,9 @@
 								</div>
 							</div>
 						</div>
-
-
-
 						
 					</div>
+
 
 					<div role="tabpanel" class="tab-pane" id="paths">
 						
@@ -94,13 +98,14 @@
 	<script type="text/javascript">
 		initScene();
 		setupKeyListeners();
+	    quickSearchInit();
+
 		var textDataForGraph = '{{ graphData }}';
 	    textDataForGraph = textDataForGraph.replace(/&quot;/g,'"');
 	    var jsonDataForGraph = JSON.parse(textDataForGraph);
 	    if (Graph.isValidGraphData(jsonDataForGraph)) {
 	    	updateGraph(jsonDataForGraph);
 	    }
-	    quickSearchInit();
 	</script>
 
 

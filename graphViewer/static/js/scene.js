@@ -9,8 +9,6 @@ function graphListener() {
     this.selectedNodeDataUIDest = $("#selectedNodeDataUIDest");
     this.selectedNodeNeighboursUIDest = $("#selectedNodeNeighboursUIDest");
     this.reportSelectNodeChange = function(node) {
-        // console.log(node.getNodeName());
-        // console.log(node.getNodeNeighbours().length);
         this.selectedNodeNameUIDest.html(node.getNodeName());
         this.selectedNodeIDUIDest.html(node.getNodeID());
         this.selectedNodeDataUIDest.html(node.readData(node.getNodeData()));
@@ -65,10 +63,6 @@ function getLine(start, end, lineColor) {
     var line = new THREE.Line( geometry, material );
     return line;
 }
-
-
-
-
 
 
 
@@ -202,15 +196,10 @@ function addGraphToScene(graph) {
     addNodesToGraphGroup(graph);
     addEdgesToGraphGroup(graph);
     scene.add(graphGroup);
-    // var spritey = makeTextSprite( "Amit", 
-    //     { fontsize: 24, borderColor: {r:0, g:0, b:0, a:0}, backgroundColor: {r:255, g:255, b:255, a:0.6} } );
-    // spritey.position.set(0,0,10);
-    // scene.add( spritey );
 }
 
 
 function clearScene() {
-	console.log("clearing scene");
     scene.remove(graphGroup);
 }
 
@@ -218,63 +207,8 @@ function clearScene() {
 function reloadGraph(graph) {
 	clearScene();
     addGraphToScene(graph);
+	reloadGraphCallback();
 }
-
-
-
-
-
-// ref: http://stackoverflow.com/questions/23514274/three-js-2d-text-sprite-labels
-// function makeTextSprite( message, parameters )
-// {
-//     var fontface = parameters.hasOwnProperty("fontface") ? parameters["fontface"] : "Arial";
-//     var fontsize = parameters.hasOwnProperty("fontsize") ? parameters["fontsize"] : 36;
-//     var borderThickness = parameters.hasOwnProperty("borderThickness") ? parameters["borderThickness"] : 4;
-//     var borderColor = parameters.hasOwnProperty("borderColor") ?parameters["borderColor"] : { r:0, g:0, b:0, a:1.0 };
-//     var backgroundColor = parameters.hasOwnProperty("backgroundColor") ?parameters["backgroundColor"] : { r:255, g:255, b:255, a:1.0 };
-//     var textColor = parameters.hasOwnProperty("textColor") ?parameters["textColor"] : { r:0, g:0, b:0, a:1.0 };
-
-//     var canvas = document.createElement('canvas');
-//     var context = canvas.getContext('2d');
-//     context.font = "Bold " + fontsize + "px " + fontface;
-//     var metrics = context.measureText( message );
-//     var textWidth = metrics.width;
-
-//     context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + "," + backgroundColor.b + "," + backgroundColor.a + ")";
-//     context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + "," + borderColor.b + "," + borderColor.a + ")";
-
-//     context.lineWidth = borderThickness;
-
-//     context.fillStyle = "rgba("+textColor.r+", "+textColor.g+", "+textColor.b+", 1.0)";
-//     context.fillText( message, borderThickness, fontsize + borderThickness);
-
-//     var texture = new THREE.Texture(canvas) 
-//     texture.needsUpdate = true;
-
-//     var spriteMaterial = new THREE.SpriteMaterial( { map: texture, useScreenCoordinates: false } );
-//     var sprite = new THREE.Sprite( spriteMaterial );
-//     sprite.scale.set(0.5 * fontsize, 0.25 * fontsize, 0.75 * fontsize);
-//     return sprite;   
-// }
-
-
-
-// function findPath() {
-//     var start = graph.getNode(01);
-//     var end = graph.getNode(07);
-//     var queue = [];
-//     var iter = graph.getIteratorFromNode(start);
-//     var nd = iter.nextNode();
-//     queue.push(nd);
-//     while(queue.length > 0) {
-//         nd = queue.pop();
-//         var nbrs = nd.getNodeNeighbours();
-//         for (var i=0; i<nbrs.length; i++) {
-//             queue.push(nbrs[i]);
-//             if (end.equals(nbrs[i])) return queue;
-//         }
-//     }
-// }
 
 
 
@@ -286,19 +220,18 @@ function updateGraph(jsonDataForGraph) {
     var graph = new Graph(jsonDataForGraph);
     bridge.setGraph(graph);
     reloadGraph(bridge.getGraph());
-	reloadGraphCallback();
 }
 
 
 initCallback = function() {
-	console.log("Scene initCallback");
+	console.log("initCallback");
     bridge = new BRIDGE();
     bridge.registerListener(webHTML);
 }
 
 
 reloadGraphCallback = function() {
-	console.log("loadGraphCallback initCallback");
+	console.log("reloadGraphCallback");
 }
 
 
@@ -309,7 +242,7 @@ frameUpdate = function() {
 
 // called in the frame after stopping
 afterStopCallBack = function() {
-	console.log("STOP!!");
+	console.log("afterStopCallBack");
 }
 
 
