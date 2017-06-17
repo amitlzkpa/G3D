@@ -100,12 +100,34 @@
 		setupKeyListeners();
 	    quickSearchInit();
 
-		var textDataForGraph = '{{ graphData }}';
+
+
+	    // '{{ graphData }}'
+
+
+	    var wikiLink = "https://en.wikipedia.org/wiki/Sachin_Tendulkar";
+
+	    function getGraphData(wikiLink) {
+	    	var retStr = "";
+	    	retStr = '{{ graphData }}';
+	    	return retStr;
+	    }
+
+
+		var textDataForGraph = getGraphData(wikiLink);
 	    textDataForGraph = textDataForGraph.replace(/&quot;/g,'"');
 	    var jsonDataForGraph = JSON.parse(textDataForGraph);
-	    if (Graph.isValidGraphData(jsonDataForGraph)) {
-	    	updateGraph(jsonDataForGraph);
-	    }
+
+
+		var msgArray = [];
+	    var retMesg = "";
+	    msgArray.push(retMesg);
+    	updateGraph(jsonDataForGraph, msgArray);
+    	retMesg = msgArray[0];
+    	if (retMesg != "") {
+    		console.log(retMesg);
+    	}
+
 	</script>
 
 

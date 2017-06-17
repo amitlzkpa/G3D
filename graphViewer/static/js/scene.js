@@ -216,22 +216,30 @@ function reloadGraph(graph) {
 
 
 
-function updateGraph(jsonDataForGraph) {
-    var graph = new Graph(jsonDataForGraph);
-    bridge.setGraph(graph);
-    reloadGraph(bridge.getGraph());
+function updateGraph(jsonDataForGraph, msgArray) {
+	var retMsg = msgArray[0];
+    if (Graph.isValidGraphData(jsonDataForGraph)) {
+	    var graph = new Graph(jsonDataForGraph);
+	    bridge.setGraph(graph);
+	    reloadGraph(bridge.getGraph());
+	    retMsg = "Succesfully updated graph with " + graph.getNodeCount() + " nodes.";
+	    msgArray[0] = retMsg;
+	    return;
+    }
+    retMsg = "Graph load failed.";
+    msgArray[0] = retMsg;
 }
 
 
 initCallback = function() {
-	console.log("initCallback");
+	// console.log("initCallback");
     bridge = new BRIDGE();
     bridge.registerListener(webHTML);
 }
 
 
 reloadGraphCallback = function() {
-	console.log("reloadGraphCallback");
+	// console.log("reloadGraphCallback");
 }
 
 

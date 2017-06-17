@@ -27,40 +27,44 @@ Array.prototype.remove = function() {
 
 function quickSearchInit() {
     $( "#wikisearch" ).autocomplete({
-      source: function( request, response ) {
-        $.ajax({
-          url: makeQueryURL(request.term),
-          dataType: "json",
-          success: function( data ) {
-            console.log(data);
-          }
-        });
-      },
-      select: function( event, ui ) {
-        console.log(ui.item.value);
-        // window.location.href = "/course/" + ui.item.value + "/2015";
-      },
-      messages: {
-          noResults: '',
-          results: function() {}
-      },
-      minLength:3,
-      delay:800
-    });
+        source: function( request, response ) {
+            $.ajax({
+                url: "wikiSearchMirror/",
+                dataType: "json",
+                data: {
+                    keyword: request.term
+                },
+                success: function( data ) {
+                    console.log(data);
+                    names = data[1];
+                    links = data[3];
+                    var result = [];
+                    for (var i=0; i<names.length; i++) {
+                        nm = names[i];
+                        lk = links[i];
+                        var newObj = {};
+                        newObj['label'] = nm;
+                        newObj['value'] = lk;
+                        result.push(newObj);
+                    }
+                    response(result);
+                }
+            });
+        },
+        select: function( event, ui ) {
+            // console.log(ui.item.value);
+            window.location.href = ui.item.value;
+    },
+    messages: {
+      noResults: '',
+      results: function() {}
+  },
+  minLength:3,
+  delay:800
+});
 }
 
 
-
-
-
-function makeQueryURL(titleName) {
-    console.log(titleName);
-    return 'www.google.com/';
-    // titleName = titleName.replace(' ', '%20')
-    // titleName = titleName.replace("\u2013", '-')
-    // var srcLink = 'https://en.wikipedia.org/w/api.php?action=query&titles=' + titleName + '&prop=links&pllimit=30&format=json';
-    // return srcLink;
-}
 
 
 

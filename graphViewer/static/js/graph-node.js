@@ -165,6 +165,11 @@ class Graph {
     }
 
 
+    getNodeCount() {
+        return this.graphArray.length;
+    }
+
+
     getNode(nodeId) {
         return this.graphLibrary[nodeId];
     }
@@ -219,21 +224,6 @@ class Graph {
 
 
 
-//---------------------------------------------------------
-
-
-
-Graph.isValidGraphData = function(nodeData) {
-    // check for duplicate ids
-    // 
-    return true;
-}
-
-
-
-
-
-
 class GraphIterator {
     constructor(graph) {
         this.iterArray = graph.getGraphArray();
@@ -249,4 +239,69 @@ class GraphIterator {
     end() {
         return (this.i == this.iterArray.length)
     }
+}
+
+
+
+
+
+
+//---------------------------------------------------------
+
+
+// ref: https://stackoverflow.com/questions/1181575/determine-whether-an-array-contains-a-value
+var contains = function(needle) {
+    // Per spec, the way to identify NaN is that it is not equal to itself
+    var findNaN = needle !== needle;
+    var indexOf;
+
+    if(!findNaN && typeof Array.prototype.indexOf === 'function') {
+        indexOf = Array.prototype.indexOf;
+    } else {
+        indexOf = function(needle) {
+            var i = -1, index = -1;
+
+            for(i = 0; i < this.length; i++) {
+                var item = this[i];
+
+                if((findNaN && item !== item) || item === needle) {
+                    index = i;
+                    break;
+                }
+            }
+
+            return index;
+        };
+    }
+
+    return indexOf.call(this, needle) > -1;
+};
+
+
+function hasNoDuplicateIds(nodeData, retInfo) {
+    var seenIds = [];
+    for (var i=0; i<nodeData.length; i++) {
+        var currNodeId = nodeData[i].getNodeID();
+        if (contains.call(seenIds, currNodeId)) {
+            retInfo = "Node contains duplicate id: " + currNodeId;
+            return false;
+        }
+        seenIds.push(currNodeId);
+    }
+    retInfo = "";
+    return true;
+}
+
+
+
+
+Graph.isValidGraphData = function(nodeData) {
+    return true;
+    var retInfo = "";
+    var duplicateIdCheck = hasNoDuplicateIds(nodeData, retInfo);
+    if (retInfo != "") {
+        console.log(retInfo);
+    }
+    var finalCheck = duplicateIdCheck;
+    return finalCheck;
 }

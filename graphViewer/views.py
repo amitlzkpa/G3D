@@ -3,10 +3,53 @@ import urllib.request
 import json
 import copy
 import sys
+from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, Http404, JsonResponse
 
 
 
 #-*- coding: utf-8 -*-
+
+
+
+
+
+def getQuery(link):
+	with urllib.request.urlopen(link) as response:
+   		pageJSON = response.read().decode('utf-8')
+	return pageJSON
+
+
+def wikiSearchMirror(request):
+	keyWordText = request.GET.get('keyword', '')
+	queryLink = 'https://en.wikipedia.org/w/api.php?action=opensearch&search=%s&limit=6&namespace=0&format=json' % keyWordText
+	queryResponse = getQuery(queryLink)
+	returnDict = json.loads(queryResponse)
+	return JsonResponse(returnDict, safe=False)
+
+
+def wikiGraphData(request):
+	wikiPageSrcLink = request.GET.get('wikipage', '')
+	returnDict = json.loads(queryResponse)
+	return JsonResponse(returnDict, safe=False)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -136,11 +179,23 @@ def index(request):
 	# uprint(tst[0]['nodeNeighbours'])
 	# graphData = json.dumps(tst)
 	# return render(request, 'graphViewer/index.html', { 'graphData': graphData })
+	titleName = 'Sachin_Tendulkar'
+	graphData = getGraphDataJSON(titleName)
+	return render(request, 'graphViewer/index.html', { 'graphData': graphData })
+
+
+def getGraphDataJSON(titleName):
+	nodeListDict = getNodeListDict(titleName)
+	nodeListJSON = json.dumps(nodeListDict)
+	return nodeListJSON
+
+
+def getNodeListDict(titleName):
 	currLvl = 0
 	maxLvl = 1
 	workStack = []
 	nodeList = []
-	pageDict = getPageData('Sachin_Tendulkar')
+	pageDict = getPageData(titleName)
 	nodeA = createDictForNode(pageDict)
 	nodeList.append(nodeA)
 	workStack = copy.deepcopy(nodeA['nodeNeighbours'])
@@ -157,8 +212,7 @@ def index(request):
 			workStack.remove(nbID)
 		except:
 			pass
-	graphData = json.dumps(nodeList)
-	return render(request, 'graphViewer/index.html', { 'graphData': graphData })
+	return nodeList
 
 
 def getEmptyNode():
