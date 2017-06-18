@@ -67,6 +67,19 @@ function quickSearchInit() {
 
 
 
+function foo() {
+    $.ajax({
+            type: 'GET',
+            url: "wikiGraphData/",
+            dataType: "json",
+            data: {
+                wikipage: "https://en.wikipedia.org/wiki/Sachin_Tendulkar"
+                },
+          success: function (data) {
+            console.log(data);
+          }
+        });
+    }   
 
 
 

@@ -29,6 +29,9 @@ def wikiSearchMirror(request):
 
 def wikiGraphData(request):
 	wikiPageSrcLink = request.GET.get('wikipage', '')
+	# uprint(wikiPageSrcLink)
+	queryResponse = '{ "Sachin": "Virat" }';
+	# queryResponse = getGraphDataJSON(wikiPageSrcLink)
 	returnDict = json.loads(queryResponse)
 	return JsonResponse(returnDict, safe=False)
 
