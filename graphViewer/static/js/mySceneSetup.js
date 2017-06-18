@@ -183,7 +183,7 @@ function initScene() {
     initScene = function() {
         renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize( (window.innerWidth * WIDTH_FACTOR), window.innerHeight );
-        renderer.setClearColor( 0xfffcf3, 1 );
+        renderer.setClearColor( 0x000000, 1 );
         document.getElementById( 'viewport' ).appendChild( renderer.domElement );
 
         scene = new THREE.Scene();

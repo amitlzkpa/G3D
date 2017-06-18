@@ -131,7 +131,7 @@ def uprint(*objects, sep=' ', end='\n', file=sys.stdout):
 
 
 def getPageData(titleName):
-	linkLength = 40
+	linkLength = 100
 	titleName = titleName.replace(' ', '%20')
 	titleName = titleName.replace("\u2013", '-')
 	srcLink = 'https://en.wikipedia.org/w/api.php?action=query&titles=%s&prop=links&pllimit=%s&format=json' % (titleName, linkLength)
