@@ -4,10 +4,27 @@
 
 
 function graphListener() {
+	this.loadedGraphId = $("#loadedGraphId");
+	this.loadedGraphName = $("#loadedGraphName");
+	this.loadedGraphNodeCount = $("#loadedGraphNodeCount");
+	this.loadedGraphNodeList = $("#loadedGraphNodeList");
     this.selectedNodeNameUIDest = $("#selectedNodeNameUIDest");
     this.selectedNodeIDUIDest = $("#selectedNodeIDUIDest");
     this.selectedNodeDataUIDest = $("#selectedNodeDataUIDest");
     this.selectedNodeNeighboursUIDest = $("#selectedNodeNeighboursUIDest");
+    this.reportLoadedGraphChange = function(graph) {
+    	this.loadedGraphId.text(graph.getGraphId());
+    	this.loadedGraphName.text(graph.getGraphName());
+    	this.loadedGraphNodeCount.text(graph.getNodeCount());
+    	var ndLst = this.loadedGraphNodeList;
+    	ndLst.empty();
+    	var nds = graph.getGraphArray();
+		// console.log(nds);
+    	$.each(nds, function(idx, val) {
+    		if (!val) return;
+    		ndLst.append("<div class='grey-box'>" + val.getNodeName() + "</div>");
+    	});
+    }
     this.reportSelectNodeChange = function(node) {
         this.selectedNodeNameUIDest.html(node.getNodeName());
         this.selectedNodeIDUIDest.html(node.getNodeID());
@@ -166,7 +183,6 @@ function addNodesToGraphGroup(graph) {
         var randomPos = getRandomPointNearPt(node.position, 20);
         node.position.set(randomPos.x, randomPos.y, randomPos.z);
         graphGroup.add(node);
-	    // scene.add(node);
     }
 }
 
@@ -184,7 +200,6 @@ function addEdgesToGraphGroup(graph) {
             if (!n) continue;
             var edge = getLine(srcNodePos, n.position,  defaultLineColor);
             graphGroup.add(edge);
-            // scene.add(edge);
         }
     }
 }
@@ -216,10 +231,10 @@ function reloadGraph(graph) {
 
 
 
-function updateGraph(jsonDataForGraph, msgArray) {
+function updateGraph(jsonDataForGraph, graphSrc, msgArray) {
 	var retMsg = msgArray[0];
     if (Graph.isValidGraphData(jsonDataForGraph)) {
-	    var graph = new Graph(jsonDataForGraph);
+	    var graph = new Graph(jsonDataForGraph, graphSrc);
 	    bridge.setGraph(graph);
 	    reloadGraph(bridge.getGraph());
 	    retMsg = "Succesfully updated graph with " + graph.getNodeCount() + " nodes.";
@@ -260,11 +275,6 @@ function setupKeyListeners() {
             // Q
             case 81: {
                 stopRunning();
-                break;
-            }
-            // G
-            case 71: {
-                loadGraph();
                 break;
             }
             // C

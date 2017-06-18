@@ -26,7 +26,8 @@ Array.prototype.remove = function() {
 
 
 function quickSearchInit() {
-    $( "#wikisearch" ).autocomplete({
+    var $inpBox = $( "#wikisearch" );
+    $inpBox.autocomplete({
         source: function( request, response ) {
             $.ajax({
                 url: "wikiSearchMirror/",
@@ -35,7 +36,6 @@ function quickSearchInit() {
                     keyword: request.term
                 },
                 success: function( data ) {
-                    console.log(data);
                     names = data[1];
                     links = data[3];
                     var result = [];
@@ -52,8 +52,9 @@ function quickSearchInit() {
             });
         },
         select: function( event, ui ) {
-            // console.log(ui.item.value);
-            window.location.href = ui.item.value;
+            refreshGraph(ui.item.value);
+            // console.log($inpBox.val());
+            $inpBox.val('');
     },
     messages: {
       noResults: '',
@@ -67,24 +68,33 @@ function quickSearchInit() {
 
 
 
-function foo() {
+function refreshGraph(wikiURL) {
     $.ajax({
             type: 'GET',
             url: "wikiGraphData/",
             dataType: "json",
             data: {
-                wikipage: "https://en.wikipedia.org/wiki/Sachin_Tendulkar"
+                wikipagetitle: wikiURL
                 },
           success: function (data) {
-            console.log(data);
+            addANewGraph(data, wikiURL);
           }
         });
     }   
 
 
 
-
-
+function addANewGraph(jsonDataForGraph, graphSrc) {
+    clearScene();
+    var msgArray = [];
+    var retMesg = "";
+    msgArray.push(retMesg);
+    updateGraph(jsonDataForGraph, graphSrc, msgArray);
+    retMesg = msgArray[0];
+    if (retMesg != "") {
+        console.log(retMesg);
+    }
+}
 
 
 

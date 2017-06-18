@@ -44,6 +44,13 @@
 }
 
 
+#loadedGraphNodeList {
+	height: 480px;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+
 
 .ui-autocomplete {
 	background-color: white;

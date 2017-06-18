@@ -28,10 +28,10 @@ def wikiSearchMirror(request):
 
 
 def wikiGraphData(request):
-	wikiPageSrcLink = request.GET.get('wikipage', '')
-	uprint(wikiPageSrcLink)
-	queryResponse = getGraphDataJSON(wikiPageSrcLink)
-	queryResponse = '{ "Sachin": "Virat" }';
+	wikiPageSrcLink = request.GET.get('wikipagetitle', '')
+	linkParts = wikiPageSrcLink.split('/')
+	wikiPageTitle = linkParts[-1].replace('_', ' ')
+	queryResponse = getGraphDataJSON(wikiPageTitle)
 	returnDict = json.loads(queryResponse)
 	return JsonResponse(returnDict, safe=False)
 
@@ -187,10 +187,9 @@ def index(request):
 	# uprint(tst[0]['nodeNeighbours'])
 	# graphData = json.dumps(tst)
 	# return render(request, 'graphViewer/index.html', { 'graphData': graphData })
-	titleName = 'Sachin_Tendulkar'
-	# titleName = "https://en.wikipedia.org/wiki/Sachin_Tendulkar"
-	graphData = getGraphDataJSON(titleName)
-	return render(request, 'graphViewer/index.html', { 'graphData': graphData })
+	# titleName = 'Sachin_Tendulkar'
+	# graphData = getGraphDataJSON(titleName)
+	return render(request, 'graphViewer/index.html', { })
 
 
 def getGraphDataJSON(titleName):

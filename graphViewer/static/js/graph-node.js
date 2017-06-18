@@ -140,7 +140,9 @@ Node.prototype.clearHighlight = function() {
 
 
 class Graph {
-    constructor(dataForGraph) {
+    constructor(dataForGraph, id, name="") {
+        this.graphId = id;
+        this.graphName = name == "" ? id : name;
         this.graphLibrary = {};
         this.graphArray = [];
         for (var i=0; i<dataForGraph.length; i++) {
@@ -162,6 +164,16 @@ class Graph {
             this.graphArray[i].setNodeNeighbours(neighbourObjects);
         }
         this.graphArray = this.graphArray.sort(function(a, b) { return b.getNodeNeighbours().length - a.getNodeNeighbours().length; });
+    }
+
+
+    getGraphId() {
+        return this.graphId;
+    }
+
+
+    getGraphName() {
+        return this.graphName;
     }
 
 
