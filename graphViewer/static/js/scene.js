@@ -16,13 +16,13 @@ function graphListener() {
     	this.loadedGraphId.text(graph.getGraphId());
     	this.loadedGraphName.text(graph.getGraphName());
     	this.loadedGraphNodeCount.text(graph.getNodeCount());
-    	var ndLst = this.loadedGraphNodeList;
-    	ndLst.empty();
+    	var nbDst = this.loadedGraphNodeList;
+    	nbDst.empty();
     	var nds = graph.getGraphArray();
-		// console.log(nds);
     	$.each(nds, function(idx, val) {
     		if (!val) return;
-    		ndLst.append("<div class='grey-box'>" + val.getNodeName() + "</div>");
+    		$html = $.parseHTML("<div class='grey-box' data-nodeId='" + val.getNodeID() + "'>" + val.getNodeName() + "</div>");
+    		var $q = nbDst.append($html);
     	});
     }
     this.reportSelectNodeChange = function(node) {
@@ -34,7 +34,8 @@ function graphListener() {
         var nbs = node.getNodeNeighbours();
         $.each(nbs, function(idx, val) {
             if (!val) return;
-            nbDst.append("<div class='grey-box'>" + val.getNodeName() + "</div>");
+    		$html = $.parseHTML("<div class='grey-box' data-nodeId='" + val.getNodeID() + "'>" + val.getNodeName() + "</div>");
+    		var $q = nbDst.append($html);
         });
     }
 }
@@ -160,29 +161,34 @@ function getTextData() {
 var graphGroup = new THREE.Group();
 
 
-// src: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
 function getRandomArbitrary(min, max) {
     return Math.random() * (max - min) + min;
 }
 
 
 function getRandomPointNearPt(srcPt, maxDistance) {
-    var rX = getRandomArbitrary(srcPt.x, srcPt.x + maxDistance);
-    var rY = getRandomArbitrary(srcPt.y, srcPt.y + maxDistance);
-    var rZ = getRandomArbitrary(srcPt.z, srcPt.z + maxDistance);
+	var startX = srcPt.x - (maxDistance/2);
+	var startY = srcPt.y - (maxDistance/2);
+	var startZ = srcPt.z - (maxDistance/2);
+    var rX = getRandomArbitrary(startX, srcPt.x + maxDistance);
+    var rY = getRandomArbitrary(startY, srcPt.y + maxDistance);
+    var rZ = getRandomArbitrary(startZ, srcPt.z + maxDistance);
     return new THREE.Vector3(rX, rY, rZ);
 }
 
 
-
-
 function addNodesToGraphGroup(graph) {
     var gIterator = graph.getIterator();
+    var maxDistrRad = 10;
+    var decrementFactor = 0.95;
+    var i = 1;
     while (!gIterator.end()) {
         var node = gIterator.nextNode();
-        var randomPos = getRandomPointNearPt(node.position, 20);
+        var distrRad = maxDistrRad / i;
+        var randomPos = getRandomPointNearPt(node.position, distrRad);
         node.position.set(randomPos.x, randomPos.y, randomPos.z);
         graphGroup.add(node);
+        i *= decrementFactor;
     }
 }
 
@@ -237,7 +243,7 @@ function updateGraph(jsonDataForGraph, graphSrc, msgArray) {
 	    var graph = new Graph(jsonDataForGraph, graphSrc);
 	    bridge.setGraph(graph);
 	    reloadGraph(bridge.getGraph());
-	    retMsg = "Succesfully updated graph with " + graph.getNodeCount() + " nodes.";
+	    // retMsg = "Succesfully updated graph with " + graph.getNodeCount() + " nodes.";
 	    msgArray[0] = retMsg;
 	    return;
     }

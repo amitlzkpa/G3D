@@ -54,7 +54,6 @@ function quickSearchInit() {
         select: function( event, ui ) {
             refreshGraph(ui.item.value);
             // console.log($inpBox.val());
-            $inpBox.val('');
     },
     messages: {
       noResults: '',
@@ -95,6 +94,8 @@ function addANewGraph(jsonDataForGraph, graphSrc) {
         console.log(retMesg);
     }
 }
+
+
 
 
 
@@ -210,7 +211,7 @@ function initScene() {
 
         g3dHookListeners();
 
-        addGridPlane();
+        // addGridPlane();
 
         initCallback();
     };
