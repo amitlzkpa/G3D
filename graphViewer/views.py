@@ -29,9 +29,9 @@ def wikiSearchMirror(request):
 
 def wikiGraphData(request):
 	wikiPageSrcLink = request.GET.get('wikipage', '')
-	# uprint(wikiPageSrcLink)
+	uprint(wikiPageSrcLink)
+	queryResponse = getGraphDataJSON(wikiPageSrcLink)
 	queryResponse = '{ "Sachin": "Virat" }';
-	# queryResponse = getGraphDataJSON(wikiPageSrcLink)
 	returnDict = json.loads(queryResponse)
 	return JsonResponse(returnDict, safe=False)
 
@@ -131,9 +131,10 @@ def uprint(*objects, sep=' ', end='\n', file=sys.stdout):
 
 
 def getPageData(titleName):
+	linkLength = 20
 	titleName = titleName.replace(' ', '%20')
 	titleName = titleName.replace("\u2013", '-')
-	srcLink = 'https://en.wikipedia.org/w/api.php?action=query&titles=%s&prop=links&pllimit=30&format=json' % titleName
+	srcLink = 'https://en.wikipedia.org/w/api.php?action=query&titles=%s&prop=links&pllimit=%s&format=json' % (titleName, linkLength)
 	pageJSON = None
 	with urllib.request.urlopen(srcLink) as response:
    		pageJSON = response.read().decode('utf-8')
@@ -141,10 +142,7 @@ def getPageData(titleName):
 	return pageDict
 
 
-def makeData(titleName):
-	titleName = titleName.replace(' ', '%20')
-	titleName = titleName.replace("\u2013", '-')
-	srcLink = 'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=%s' % titleName
+def makeData(srcLink):
 	pageJSON = None
 	with urllib.request.urlopen(srcLink) as response:
    		pageJSON = response.read().decode('utf-8')
@@ -160,6 +158,12 @@ def makeData(titleName):
 	return dataDict
 
 
+def getWikiLink(titleName):
+	titleName = titleName.replace(' ', '%20')
+	titleName = titleName.replace("\u2013", '-')
+	srcLink = 'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=%s' % titleName
+	return srcLink
+
 
 def createDictForNode(pageDict):
 	pageIDD, info = pageDict['query']['pages'].popitem()
@@ -170,7 +174,8 @@ def createDictForNode(pageDict):
 		linkList.append(rawLink['title'])
 		# uprint(link['title'])
 	# uprint(str(pageDict))
-	data = makeData(title)
+	srcLink = getWikiLink(title)
+	data = makeData(srcLink)
 	node = createNode(title, data, linkList)
 	return node
 
@@ -183,6 +188,7 @@ def index(request):
 	# graphData = json.dumps(tst)
 	# return render(request, 'graphViewer/index.html', { 'graphData': graphData })
 	titleName = 'Sachin_Tendulkar'
+	# titleName = "https://en.wikipedia.org/wiki/Sachin_Tendulkar"
 	graphData = getGraphDataJSON(titleName)
 	return render(request, 'graphViewer/index.html', { 'graphData': graphData })
 
@@ -210,7 +216,7 @@ def getNodeListDict(titleName):
 			if (nbNode not in nodeList):
 				nodeList.append(nbNode)
 			else:
-				print('CONNECTION----------->')
+				uprint('CONNECTION----------->')
 				uprint(nbNode)
 			workStack.remove(nbID)
 		except:
