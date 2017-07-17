@@ -21,6 +21,7 @@ def getQuery(link):
 
 def wikiSearchMirror(request):
 	keyWordText = request.GET.get('keyword', '')
+	keyWordText = keyWordText.replace(' ', '+')
 	queryLink = 'https://en.wikipedia.org/w/api.php?action=opensearch&search=%s&limit=6&namespace=0&format=json' % keyWordText
 	queryResponse = getQuery(queryLink)
 	returnDict = json.loads(queryResponse)

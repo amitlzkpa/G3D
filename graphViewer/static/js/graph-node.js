@@ -25,8 +25,9 @@ function Node(nodeID, nodeName, nodeData, nodeNeighbours) {
     this.nodeInfo.nodeName = nodeName;
     this.nodeInfo.nodeData = nodeData;
     this.nodeInfo.nodeNeighbours = nodeNeighbours;
-    this.geometry = new THREE.SphereGeometry(1, 32, 32);
-    this.material = new THREE.MeshBasicMaterial({color: normalColor});
+    this.nodeInfo.labelMesh = getTextMesh(nodeName);
+    this.geometry = new THREE.SphereGeometry(1, 6, 6);
+    this.material = new THREE.MeshPhongMaterial({color: normalColor, shininess: 1});
     THREE.Mesh.call( this, this.geometry, this.material );
 }
 
@@ -43,6 +44,10 @@ Node.prototype.getNodeName = function() {
     return this.nodeInfo.nodeName;
 }
 
+Node.prototype.getNodeLabelMesh = function() {
+    return this.nodeInfo.labelMesh;
+}
+
 Node.prototype.getNodeData = function() {
     return this.nodeInfo.nodeData;
 }
@@ -53,6 +58,11 @@ Node.prototype.getNodeNeighbours = function() {
 
 Node.prototype.setNodeNeighbours = function(neightbourArray) {
     this.nodeInfo.nodeNeighbours = neightbourArray;
+}
+
+Node.prototype.setPosition = function(x, y, z) {
+    this.position.set(x, y, z);
+    this.getNodeLabelMesh().position.set(x+1.2, y, z);
 }
 
 Node.prototype.equals = function(otherNode) {

@@ -186,8 +186,10 @@ function addNodesToGraphGroup(graph) {
         var node = gIterator.nextNode();
         var distrRad = maxDistrRad / i;
         var randomPos = getRandomPointNearPt(node.position, distrRad);
-        node.position.set(randomPos.x, randomPos.y, randomPos.z);
+        node.setPosition(randomPos.x, randomPos.y, randomPos.z);
+        var lbl = node.getNodeLabelMesh();
         graphGroup.add(node);
+        graphGroup.add(lbl);
         i *= decrementFactor;
     }
 }

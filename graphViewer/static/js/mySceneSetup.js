@@ -98,7 +98,22 @@ function addANewGraph(jsonDataForGraph, graphSrc) {
 
 
 
+var loadedFont;
+var textMat;
 
+function getTextMesh(text) {
+    var geom = new THREE.TextGeometry( text, {
+        font: loadedFont,
+        size: 0.5,
+        height: 0,
+        curveSegments: 12,
+    } );
+    var textMesh = new THREE.Mesh(
+        geom,
+        textMat
+      );
+    return textMesh;
+}
 
 
 
@@ -176,14 +191,24 @@ function initScene() {
         window.removeEventListener( 'resize', g3dOnWindowResize, false );
     }
 
+
+
     
     frameUpdate;
 
     
     initScene = function() {
+
+        var loader = new THREE.FontLoader();
+        loader.load( 'static/fonts/Open Sans_Regular.json', function ( font ) {
+            loadedFont = font;
+        } );
+        textMat = new THREE.MeshBasicMaterial({color: "#000000"});
+
+
         renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize( (window.innerWidth * WIDTH_FACTOR), window.innerHeight );
-        renderer.setClearColor( 0x000000, 1 );
+        renderer.setClearColor( 0xf5f5dc, 1 );
         document.getElementById( 'viewport' ).appendChild( renderer.domElement );
 
         scene = new THREE.Scene();
