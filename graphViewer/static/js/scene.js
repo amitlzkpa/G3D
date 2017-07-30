@@ -239,12 +239,16 @@ function reloadGraph(graph) {
 
 
 
+var graphViz;
+
+
+
 function updateGraph(jsonDataForGraph, graphSrc, msgArray) {
 	var retMsg = msgArray[0];
     if (Graph.isValidGraphData(jsonDataForGraph)) {
 	    var graph = new Graph(jsonDataForGraph, graphSrc);
-	    bridge.setGraph(graph);
-	    reloadGraph(bridge.getGraph());
+	    graphViz.setGraph(graph);
+	    reloadGraph(graphViz.getGraph());
 	    // retMsg = "Succesfully updated graph with " + graph.getNodeCount() + " nodes.";
 	    msgArray[0] = retMsg;
 	    return;
@@ -255,9 +259,9 @@ function updateGraph(jsonDataForGraph, graphSrc, msgArray) {
 
 
 initCallback = function() {
-	// console.log("initCallback");
-    bridge = new BRIDGE();
-    bridge.registerListener(webHTML);
+    graphViz = new GraphVisualization("graphViz");
+    G3D.addVisualization(graphViz);
+    graphViz.registerListener(webHTML);
 }
 
 

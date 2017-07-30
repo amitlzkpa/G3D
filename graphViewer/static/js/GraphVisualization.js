@@ -8,14 +8,17 @@
 
 
 
-var BRIDGE = function() {
+var GraphVisualization = function(name) {
+    this.name = name;
     this.graph = null;
     this.selectedNode = null;
     this.changeListeners = [];
 }
 
 
-BRIDGE.prototype.setSelectedNode = function(node) {
+GraphVisualization.prototype.objectClicked = function(clickObject) {
+    if (!clickObject.isNode) return;
+    var node = clickObject;
     if (this.selectedNode != null) this.selectedNode.onUnClick();
     this.selectedNode = node;
     this.selectedNode.onClick();
@@ -25,7 +28,7 @@ BRIDGE.prototype.setSelectedNode = function(node) {
 }
 
 
-BRIDGE.prototype.registerListener = function(listener) {
+GraphVisualization.prototype.registerListener = function(listener) {
     if (!listener.hasOwnProperty('reportSelectNodeChange')) {
         throw "Listener must have method named 'reportSelectNodeChange(node)' accepting a node as parameter.";
     }
@@ -36,7 +39,7 @@ BRIDGE.prototype.registerListener = function(listener) {
 }
 
 
-BRIDGE.prototype.deregisterListener = function(listener) {
+GraphVisualization.prototype.deregisterListener = function(listener) {
     var remIdx = -1;
     for (var i=0; i<this.changeListeners.length; i++) {
         if (this.changeListeners[i] == listener) remIdx = i;
@@ -48,7 +51,7 @@ BRIDGE.prototype.deregisterListener = function(listener) {
 }
 
 
-BRIDGE.prototype.setGraph = function(graph) {
+GraphVisualization.prototype.setGraph = function(graph) {
     this.graph = graph;
     for (var i=0; i<this.changeListeners.length; i++) {
         this.changeListeners[i].reportLoadedGraphChange(this.graph);
@@ -56,7 +59,7 @@ BRIDGE.prototype.setGraph = function(graph) {
 }
 
 
-BRIDGE.prototype.getGraph = function() {
+GraphVisualization.prototype.getGraph = function() {
     return this.graph;
 }
 

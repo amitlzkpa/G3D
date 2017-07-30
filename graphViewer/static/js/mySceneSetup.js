@@ -7,18 +7,14 @@ var loadGraphCallback;
 class G3DMouseInputManager {
 
 
-    constructor(mouse) {
-        this.mouse = mouse;
-    }
-
-
-    setG3DManager(G3DManager) {
+    constructor(G3DManager) {
+        this.mouse = new THREE.Vector2();
         this.G3DManager = G3DManager;
         this.g3dHookListeners();
     }
 
 
-    unsetG3DManager() {
+    destroy() {
         this.G3DManager = null;
         this.g3dUnhookListeners();
     }
@@ -31,11 +27,7 @@ class G3DMouseInputManager {
         raycaster.precision = 200;
         raycaster.setFromCamera( this.mouse, this.camera );
         var intersects = raycaster.intersectObjects( this.scene.children, true );
-        if (intersects.length > 1 && intersects[0].object.isNode) {
-            // need reference for bridge in here
-            // console.log(intersects[0].object);
-            bridge.setSelectedNode(intersects[0].object);
-        }
+        G3D.objectsClicked(intersects);
     }
 
 
@@ -78,7 +70,6 @@ class G3DMouseInputManager {
 
 var loadedFont;
 var G3D;
-var bridge;
 var scene, camera;
 function initScene() {
 
@@ -96,6 +87,7 @@ function initScene() {
 
 
 
+        mouse = new THREE.Vector2();
         renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize( (window.innerWidth * WIDTH_FACTOR), window.innerHeight );
         renderer.setClearColor( 0xf5f5dc, 1 );
@@ -103,11 +95,8 @@ function initScene() {
 
         scene = new THREE.Scene();
 
-        G3D = new G3DManager(scene, camera);
-
-        mouse = new THREE.Vector2();
-        var G3DMouseManager = new G3DMouseInputManager(mouse);
-        G3D.setMouseInputManager(G3DMouseManager);
+        G3D = new G3DManager(scene);
+        var G3DMouseManager = new G3DMouseInputManager(G3D);
 
         camera = new THREE.PerspectiveCamera(
             35,
@@ -129,8 +118,6 @@ function initScene() {
         raycaster = new THREE.Raycaster();
         raycaster.lineprecision = 200;
         raycaster.precision = 200;
-
-        // g3dHookListeners();
 
         // scene.add(getGrid(200, 200, 3, 3));
 
