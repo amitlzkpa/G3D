@@ -7,8 +7,6 @@
 
 
 
-
-
 var highLightColor = new THREE.Color("rgb(255, 0, 0)");
 var normalColor = new THREE.Color("rgb(255, 255, 0)");
 var neightbourHighlightColor = new THREE.Color("rgb(0, 255, 0)");
@@ -25,7 +23,7 @@ function Node(nodeID, nodeName, nodeData, nodeNeighbours) {
     this.nodeInfo.nodeName = nodeName;
     this.nodeInfo.nodeData = nodeData;
     this.nodeInfo.nodeNeighbours = nodeNeighbours;
-    this.nodeInfo.labelMesh = getTextMesh(nodeName);
+    this.nodeInfo.labelMesh = getTextMesh(nodeName, "#000000");
     this.geometry = new THREE.SphereGeometry(1, 6, 6);
     this.material = new THREE.MeshPhongMaterial({color: normalColor, shininess: 1});
     THREE.Mesh.call( this, this.geometry, this.material );

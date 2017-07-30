@@ -1,149 +1,83 @@
 
-var stopRunning;
 
 var initCallback;
 var loadGraphCallback;
-var afterStopCallBack;
 
 
+class G3DMouseInputManager {
 
 
+    constructor(mouse) {
+        this.mouse = mouse;
+    }
 
-Array.prototype.remove = function() {
-    var what, a = arguments, L = a.length, ax;
-    while (L && this.length) {
-        what = a[--L];
-        while ((ax = this.indexOf(what)) !== -1) {
-            this.splice(ax, 1);
+
+    setG3DManager(G3DManager) {
+        this.G3DManager = G3DManager;
+        this.g3dHookListeners();
+    }
+
+
+    unsetG3DManager() {
+        this.G3DManager = null;
+        this.g3dUnhookListeners();
+    }
+
+
+    g3dOnMouseClick( event ) {
+        var raycaster;
+        raycaster = new THREE.Raycaster();
+        raycaster.lineprecision = 200;
+        raycaster.precision = 200;
+        raycaster.setFromCamera( this.mouse, this.camera );
+        var intersects = raycaster.intersectObjects( this.scene.children, true );
+        if (intersects.length > 1 && intersects[0].object.isNode) {
+            // need reference for bridge in here
+            console.log(intersects[0].object);
+            // bridge.setSelectedNode(intersects[0].object);
         }
     }
-    return this;
-};
 
 
-
-
-
-
-function quickSearchInit() {
-    var $inpBox = $( "#wikisearch" );
-    $inpBox.autocomplete({
-        source: function( request, response ) {
-            $.ajax({
-                url: "wikiSearchMirror/",
-                dataType: "json",
-                data: {
-                    keyword: request.term
-                },
-                success: function( data ) {
-                    names = data[1];
-                    links = data[3];
-                    var result = [];
-                    for (var i=0; i<names.length; i++) {
-                        nm = names[i];
-                        lk = links[i];
-                        var newObj = {};
-                        newObj['label'] = nm;
-                        newObj['value'] = lk;
-                        result.push(newObj);
-                    }
-                    response(result);
-                }
-            });
-        },
-        select: function( event, ui ) {
-            refreshGraph(ui.item.value);
-            // console.log($inpBox.val());
-    },
-    messages: {
-      noResults: '',
-      results: function() {}
-  },
-  minLength:3,
-  delay:800
-});
-}
-
-
-
-
-function refreshGraph(wikiURL) {
-    $.ajax({
-            type: 'GET',
-            url: "wikiGraphData/",
-            dataType: "json",
-            data: {
-                wikipagetitle: wikiURL
-                },
-          success: function (data) {
-            addANewGraph(data, wikiURL);
-          }
-        });
-    }   
-
-
-
-function addANewGraph(jsonDataForGraph, graphSrc) {
-    clearScene();
-    var msgArray = [];
-    var retMesg = "";
-    msgArray.push(retMesg);
-    updateGraph(jsonDataForGraph, graphSrc, msgArray);
-    retMesg = msgArray[0];
-    if (retMesg != "") {
-        console.log(retMesg);
+    g3dOnMouseMove( event ) {
+        // calculate mouse position in normalized device coordinates
+        // (-1 to +1) for both components
+        this.mouse = new THREE.Vector2();
+        this.mouse.x = ( event.clientX / (window.innerWidth * 0.64) ) * 2 - 1;
+        this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
     }
+
+
+    g3dOnWindowResize() {
+        this.camera.aspect = (window.innerWidth * 0.64) / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+        renderer.setSize( (window.innerWidth * 0.64), window.innerHeight );
+    }
+
+
+    g3dHookListeners() {
+        window.addEventListener( 'mousemove', this.g3dOnMouseMove, false );
+        window.addEventListener( 'click', this.g3dOnMouseClick, false );
+        window.addEventListener( 'resize', this.g3dOnWindowResize, false );
+    }
+
+
+    g3dUnhookListeners() {
+        window.removeEventListener( 'mousemove', this.g3dOnMouseMove, false );
+        window.removeEventListener( 'click', this.g3dOnMouseClick, false );
+        window.removeEventListener( 'resize', this.g3dOnWindowResize, false );
+    }
+
 }
 
+
+
+//---------------------------------------------------------
 
 
 
 var loadedFont;
-var textMat;
-
-function getTextMesh(text) {
-    var geom = new THREE.TextGeometry( text, {
-        font: loadedFont,
-        size: 0.5,
-        height: 0,
-        curveSegments: 12,
-    } );
-    var textMesh = new THREE.Mesh(
-        geom,
-        textMat
-      );
-    return textMesh;
-}
-
-
-
-
-
-
-
-
-
-
-function addGridPlane() {
-    var planeW = 200; // pixels
-    var planeH = 200; // pixels 
-    var numW = 3; // how many wide (50*50 = 2500 pixels wide)
-    var numH = 3; // how many tall (50*50 = 2500 pixels tall)
-    var plane = new THREE.Mesh(
-        new THREE.PlaneGeometry( planeW*numW, planeH*numH, planeW, planeH ),
-        new THREE.MeshBasicMaterial( {
-            color: 0xBDBDBD,
-            wireframe: true
-        } )
-    );
-    plane.rotation.set(Math.PI/2, 0, Math.PI/2);
-
-    scene.add(plane);
-}
-
-
-
-
+var G3D;
 var bridge;
 var scene, camera;
 function initScene() {
@@ -152,46 +86,7 @@ function initScene() {
     var raycaster, mouse;
     var WIDTH_FACTOR = 0.64;
 
-
-    function g3dOnMouseClick( event ) {
-        raycaster.setFromCamera( mouse, camera );
-        var intersects = raycaster.intersectObjects( scene.children, true );
-        if (intersects.length > 1 && intersects[0].object.isNode) {
-            bridge.setSelectedNode(intersects[0].object);
-        }
-    }
-
-
-    function g3dOnMouseMove( event ) {
-        // calculate mouse position in normalized device coordinates
-        // (-1 to +1) for both components
-        mouse.x = ( event.clientX / (window.innerWidth * WIDTH_FACTOR) ) * 2 - 1;
-        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-    }
-
-
-    function g3dOnWindowResize() {
-        camera.aspect = (window.innerWidth * WIDTH_FACTOR) / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize( (window.innerWidth * WIDTH_FACTOR), window.innerHeight );
-    }
-
-
-    function g3dHookListeners() {
-        mouse = new THREE.Vector2();
-        window.addEventListener( 'mousemove', g3dOnMouseMove, false );
-        window.addEventListener( 'click', g3dOnMouseClick, false );
-        window.addEventListener( 'resize', g3dOnWindowResize, false );
-    }
-
-
-    function g3dUnhookListeners() {
-        window.removeEventListener( 'mousemove', g3dOnMouseMove, false );
-        window.removeEventListener( 'click', g3dOnMouseClick, false );
-        window.removeEventListener( 'resize', g3dOnWindowResize, false );
-    }
-
-
+    loadedFont = loadFont('static/fonts/Open Sans_Regular.json');
 
     
     frameUpdate;
@@ -199,11 +94,6 @@ function initScene() {
     
     initScene = function() {
 
-        var loader = new THREE.FontLoader();
-        loader.load( 'static/fonts/Open Sans_Regular.json', function ( font ) {
-            loadedFont = font;
-        } );
-        textMat = new THREE.MeshBasicMaterial({color: "#000000"});
 
 
         renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -212,6 +102,12 @@ function initScene() {
         document.getElementById( 'viewport' ).appendChild( renderer.domElement );
 
         scene = new THREE.Scene();
+
+        G3D = new G3DManager(scene, camera);
+
+        mouse = new THREE.Vector2();
+        var G3DMouseManager = new G3DMouseInputManager(mouse);
+        G3D.setMouseInputManager(G3DMouseManager);
 
         camera = new THREE.PerspectiveCamera(
             35,
@@ -234,9 +130,9 @@ function initScene() {
         raycaster.lineprecision = 200;
         raycaster.precision = 200;
 
-        g3dHookListeners();
+        // g3dHookListeners();
 
-        // addGridPlane();
+        // scene.add(getGrid(200, 200, 3, 3));
 
         initCallback();
     };
@@ -261,20 +157,11 @@ function initScene() {
 
 
 
-    stop = false;
-    stoppingFrame = false;
 
     function renderScene(){
         var controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.target.set( 0, 0, 0 );
         function render() {
-            if (stop) {
-                if (!stoppingFrame) return;
-                afterStopCallBack();
-                stoppingFrame = false;
-                g3dUnhookListeners();
-                return;
-            }
             // update the picking ray with the camera and mouse position
             raycaster.setFromCamera( mouse, camera );
             var intersects = raycaster.intersectObjects( scene.children );
@@ -291,13 +178,6 @@ function initScene() {
     function initAndRenderScene() {
         initScene();
         renderScene();
-    }
-
-
-
-    stopRunning = function() {
-        stop = true;
-        stoppingFrame = true;
     }
 
 

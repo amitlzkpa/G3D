@@ -282,7 +282,6 @@ function setupKeyListeners() {
         switch ( event.keyCode ) {
             // Q
             case 81: {
-                stopRunning();
                 break;
             }
             // C
