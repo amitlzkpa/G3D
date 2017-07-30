@@ -33,8 +33,8 @@ class G3DMouseInputManager {
         var intersects = raycaster.intersectObjects( this.scene.children, true );
         if (intersects.length > 1 && intersects[0].object.isNode) {
             // need reference for bridge in here
-            console.log(intersects[0].object);
-            // bridge.setSelectedNode(intersects[0].object);
+            // console.log(intersects[0].object);
+            bridge.setSelectedNode(intersects[0].object);
         }
     }
 
